@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <cmath>
 
 using namespace std;
 
@@ -15,14 +16,13 @@ struct CSegment {
 
 struct CTable {
     CPoint   points[MAX_POINTS]     ;
-    bool     isSelected[MAX_POINTS] ; // 'isSelected[i] = true' only when 'i' is already in a segment
     CSegment segments[MAX_POINTS]   ;
+    bool     isSelected[MAX_POINTS] ; // 'isSelected[i] = true' only when 'i' is already in a segment
 
     int numberOfSegments,
-        numberOfPoints  ;
-
-    int windowHeight,
-        windowWidth ;
+        numberOfPoints  ,
+        windowHeight    ,
+        windowWidth     ;
 };
 
 struct CSettings {
@@ -35,11 +35,12 @@ struct CLine {
     int a, b, c;
 };
 
-CPoint  LineIntersections(CLine &line1, CLine &line2);
-void    GenerateNRandomPoints(CTable &table, int N);
-bool    TheGameIsOver(CTable &table);
-bool    SegmentsAreIntersecting(CSegment &s1, CSegment &s2);
-CLine   ComputeLineEquationForSegment(CSegment &segment);
+CPoint  LineIntersections(CLine &line1, CLine &line2)       ;
+void    GenerateNRandomPoints(CTable &table, int N)         ;
+bool    TheGameIsOver(CTable &table)                        ;
+bool    IsPointOnSegment(CSegment &segment, CPoint &point)  ;
+bool    SegmentsAreIntersecting(CSegment &s1, CSegment &s2) ;
+int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) ;
 
 int main() {
     cout << "Hello world!\n";
@@ -95,14 +96,36 @@ bool TheGameIsOver(CTable &table) {
 }
 
 bool SegmentsAreIntersecting(CSegment &s1, CSegment &s2) {
-    CLine line1, line2;
+    int o1 = ComputeOrientation(s1.A, s1.B, s2.A);
+    int o2 = ComputeOrientation(s1.A, s1.B, s2.B);
+    int o3 = ComputeOrientation(s2.A, s2.B, s1.A);
+    int o4 = ComputeOrientation(s2.A, s2.B, s1.B);
 
-    line1 = ComputeLineEquationForSegment(s1);
-    line2 = ComputeLineEquationForSegment(s2);
+    if(o1 != o2 && o3 != o4) return true;
 
-    CPoint pointIntersection = LineIntersections(line1, line2);
+    if(o1 == 0 && IsPointOnSegment(s1, s2.A) == true) return true;
+    if(o2 == 0 && IsPointOnSegment(s1, s2.B) == true) return true;
+    if(o3 == 0 && IsPointOnSegment(s2, s1.A) == true) return true;
+    if(o4 == 0 && IsPointOnSegment(s2, s1.B) == true) return true;
+
+    return false;
 }
 
-CLine ComputeLineEquationForSegment(CSegment &segment) {
+bool IsPointOnSegment(CSegment &segment, CPoint &point) {
+    if(max(segment.A.x, segment.B.x) >= point.x &&
+       min(segment.A.x, segment.B.x) <= point.x &&
+       max(segment.A.y, segment.B.y) >= point.y &&
+       min(segment.A.y, segment.B.y) <= point.y)
+        return true;
 
+    return false;
+}
+
+int ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) {
+    int rez = (B.y - A.y) * (C.x - B.x) -
+              (B.x - A.x) * (C.y - B.y) ;
+
+    if(!rez) return 0;
+
+    return rez / abs(rez);
 }
