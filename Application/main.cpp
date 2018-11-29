@@ -1,19 +1,36 @@
 #include <iostream>
 #include <ctime>
-#include <cmath>
 
 using namespace std;
 
 #define MAX_POINTS 105
+#define MAX_NAME   25
 
+///---------------- Geometry structs ---------------------------------------------------------------
 struct CPoint {
     int x, y;
 };
-
 struct CSegment {
     CPoint A, B;
 };
+///-------------------------------------------------------------------------------------------------
 
+///---------------- Settings struct of the Game ----------------------------------------------------
+struct CSettings {
+    int numberOfPoints;
+    int colorOfPlayer1,
+        colorOfPlayer2;
+
+    int  botLevel        ;
+    bool isPlayingWithBot;
+    int  firstToWin      ;
+
+    char namePlayer1[MAX_NAME],
+         namePlayer2[MAX_NAME];
+};
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Table game struct --------------------------------------------------------------
 struct CTable {
     CPoint   points[MAX_POINTS]     ;
     CSegment segments[MAX_POINTS]   ;
@@ -22,32 +39,43 @@ struct CTable {
     int numberOfSegments,
         numberOfPoints  ,
         windowHeight    ,
-        windowWidth     ;
+        windowWidth     ,
+        firstWinnings   ,
+        secondWinnings  ;
+
+    CSettings settings  ;
 };
+///-------------------------------------------------------------------------------------------------
 
-struct CSettings {
-    int numberOfPoints;
-    int colorOfPlayer1,
-        colorOfPlayer2;
-};
+///---------------- Game Engine Functions ----------------------------------------------------------
+void    StartGame(CTable &table)                    ;
+bool    TheGameIsOver(CTable &table)                ;
+void    GenerateNRandomPoints(CTable &table, int N) ;
+///-------------------------------------------------------------------------------------------------
 
-struct CLine {
-    int a, b, c;
-};
+///---------------- Geometry Functions -------------------------------------------------------------
+bool    IsPointOnSegment(CSegment &segment, CPoint &point) ;
+bool    SegmentsAreIntersecting(CSegment &s1, CSegment &s2);
+int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C);
+///-------------------------------------------------------------------------------------------------
 
-CPoint  LineIntersections(CLine &line1, CLine &line2)       ;
-void    GenerateNRandomPoints(CTable &table, int N)         ;
-bool    TheGameIsOver(CTable &table)                        ;
-bool    IsPointOnSegment(CSegment &segment, CPoint &point)  ;
-bool    SegmentsAreIntersecting(CSegment &s1, CSegment &s2) ;
-int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) ;
+///---------------- CSettings Functions ----------------------------------------------------------
+void    setNumberOfPoints(CTable &table, int &newN);
+void    setGameWithBot(CTable &table, bool &status);
+void    setFirstToWin(CTable &table, int &firstToW);
+///-------------------------------------------------------------------------------------------------
 
+
+///---------------- Main Function ------------------------------------------------------------------
 int main() {
     cout << "Hello world!\n";
 
     return 0;
 }
+///-------------------------------------------------------------------------------------------------
 
+
+///---------------- Generator of N Random Points ----------------------------------------------------
 void GenerateNRandomPoints(CTable &table, int N) {
     srand(time(NULL));
 
@@ -63,7 +91,9 @@ void GenerateNRandomPoints(CTable &table, int N) {
         table.points[++table.numberOfPoints] = newPoint;
     }
 }
+///-------------------------------------------------------------------------------------------------
 
+///---------------- Check if the game is over ------------------------------------------------------
 bool TheGameIsOver(CTable &table) {
     for(int firstPoint = 1; firstPoint <= table.numberOfPoints; ++firstPoint) {
 
@@ -94,7 +124,9 @@ bool TheGameIsOver(CTable &table) {
 
     return true;
 }
+///-------------------------------------------------------------------------------------------------
 
+///---------------- Check if two given segments are intersecting -----------------------------------
 bool SegmentsAreIntersecting(CSegment &s1, CSegment &s2) {
     int o1 = ComputeOrientation(s1.A, s1.B, s2.A);
     int o2 = ComputeOrientation(s1.A, s1.B, s2.B);
@@ -110,7 +142,9 @@ bool SegmentsAreIntersecting(CSegment &s1, CSegment &s2) {
 
     return false;
 }
+///-------------------------------------------------------------------------------------------------
 
+///---------------- Check if a given point is on a given segment -----------------------------------
 bool IsPointOnSegment(CSegment &segment, CPoint &point) {
     if(max(segment.A.x, segment.B.x) >= point.x &&
        min(segment.A.x, segment.B.x) <= point.x &&
@@ -120,7 +154,9 @@ bool IsPointOnSegment(CSegment &segment, CPoint &point) {
 
     return false;
 }
+///-------------------------------------------------------------------------------------------------
 
+///---------------- Check if point C is on the right/left side of segment [AB] ---------------------
 int ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) {
     int rez = (B.y - A.y) * (C.x - B.x) -
               (B.x - A.x) * (C.y - B.y) ;
@@ -129,3 +165,48 @@ int ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) {
 
     return rez / abs(rez);
 }
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Set number of points on the table ----------------------------------------------
+void setNumberOfPoints(CTable &table, int &newN) {
+    table.settings.numberOfPoints = newN;
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Set if user is playing with BOT ------------------------------------------------
+void setGameWithBot(CTable &table, bool &status) {
+    table.settings.isPlayingWithBot = status;
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Set the winning score ----------------------------------------------------------
+void setFirstToWin(CTable &table, int &firstToW) {
+    table.settings.firstToWin = firstToW;
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Engine of the game -------------------------------------------------------------
+void StartGame(CTable &table) {
+    do {
+        /// ... Initializari etc
+        /// Functie de clear a ecranului
+        GenerateNRandomPoints(table, table.settings.numberOfPoints);
+
+        int playerToMove = 0; // 0 - first, 1 - second
+
+        while(!TheGameIsOver(table)) {
+
+            /// ... Partea de grafica, selectie a punctelor etc
+
+            playerToMove = 1 - playerToMove;
+        }
+
+        if(!playerToMove) {
+            table.firstWinnings++;
+        }
+        else {
+            table.secondWinnings++;
+        }
+    } while(max(table.firstWinnings, table.secondWinnings) < table.settings.firstToWin);
+}
+///-------------------------------------------------------------------------------------------------
