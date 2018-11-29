@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1543389374 source:d:\personal data\faculty documents\projectip\projectip\application\main.cpp
+	<iostream>
+	<ctime>
+
