@@ -60,9 +60,9 @@ int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C);
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- CSettings Functions ----------------------------------------------------------
-void    setNumberOfPoints(CTable &table, int &newN);
-void    setGameWithBot(CTable &table, bool &status);
-void    setFirstToWin(CTable &table, int &firstToW);
+void    SetNumberOfPoints(CTable &table, int &newN);
+void    SetGameWithBot(CTable &table, bool &status);
+void    SetFirstToWin(CTable &table, int &firstToW);
 ///-------------------------------------------------------------------------------------------------
 
 
@@ -168,19 +168,19 @@ int ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) {
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set number of points on the table ----------------------------------------------
-void setNumberOfPoints(CTable &table, int &newN) {
+void SetNumberOfPoints(CTable &table, int &newN) {
     table.settings.numberOfPoints = newN;
 }
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set if user is playing with BOT ------------------------------------------------
-void setGameWithBot(CTable &table, bool &status) {
+void SetGameWithBot(CTable &table, bool &status) {
     table.settings.isPlayingWithBot = status;
 }
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set the winning score ----------------------------------------------------------
-void setFirstToWin(CTable &table, int &firstToW) {
+void SetFirstToWin(CTable &table, int &firstToW) {
     table.settings.firstToWin = firstToW;
 }
 ///-------------------------------------------------------------------------------------------------
