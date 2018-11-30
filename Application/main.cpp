@@ -1,4 +1,6 @@
 #include <iostream>
+#include <graphics.h>
+#include <winbgim.h>
 #include <ctime>
 
 using namespace std;
@@ -48,9 +50,9 @@ struct CTable {
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Game Engine Functions ----------------------------------------------------------
-void    StartGame(CTable &table)                    ;
-bool    TheGameIsOver(CTable &table)                ;
-void    GenerateNRandomPoints(CTable &table, int N) ;
+void    StartGame(CTable &table)            ;
+bool    TheGameIsOver(CTable &table)        ;
+void    GenerateNRandomPoints(CTable &table);
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry Functions -------------------------------------------------------------
@@ -60,15 +62,65 @@ int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C);
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- CSettings Functions ----------------------------------------------------------
-void    setNumberOfPoints(CTable &table, int &newN);
-void    setGameWithBot(CTable &table, bool &status);
-void    setFirstToWin(CTable &table, int &firstToW);
+void    SetNumberOfPoints(CTable &table, int &newN);
+void    SetGameWithBot(CTable &table, bool &status);
+void    SetFirstToWin(CTable &table, int &firstToW);
 ///-------------------------------------------------------------------------------------------------
 
 
 ///---------------- Main Function ------------------------------------------------------------------
 int main() {
-    cout << "Hello world!\n";
+    initwindow(800, 600, "Segments Game");
+
+    int pageIndex = 0;
+
+    /*
+    0 - Main Page
+    1 - Settings Page
+    2 - Game Page
+    */
+
+    outtextxy(300, 0, "Welcome to Segments Game");
+
+    rectangle(50, 50, 164, 90);
+    outtextxy(60, 60, "Game Settings");
+
+    rectangle(50, 100, 164, 140);
+    outtextxy(90, 110, "Play");
+
+    while(true) {
+        int x, y;
+        getmouseclick(WM_LBUTTONDOWN, x, y);
+
+        if(!(x < 0 && y < 0)) {
+            if(x >= 50 && x <= 164 && y >= 50 && y <= 90 && pageIndex == 0) {
+                cleardevice();
+                outtextxy(10, 10, "Settings Page. In Progress...");
+                pageIndex = 1;
+            }
+            else {
+                if(x >= 50 && x <= 164 && y >= 100 && y <= 140 && pageIndex == 0) {
+                    cleardevice();
+                    CTable table;
+
+                    table.numberOfPoints = 5;
+                    table.windowHeight = 600;
+                    table.windowWidth = 800;
+                    table.numberOfPoints = 20;
+                    pageIndex = 2;
+
+                    GenerateNRandomPoints(table);
+
+                    for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
+                        circle(table.points[pointIndex].x, table.points[pointIndex].y, 3);
+                    }
+                }
+            }
+        }
+    }
+
+    getch();
+    closegraph();
 
     return 0;
 }
@@ -76,10 +128,10 @@ int main() {
 
 
 ///---------------- Generator of N Random Points ----------------------------------------------------
-void GenerateNRandomPoints(CTable &table, int N) {
+void GenerateNRandomPoints(CTable &table) {
     srand(time(NULL));
 
-    while(N--) {
+    for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
         int xCoordinate = rand() % table.windowWidth ;
         int yCoordinate = rand() % table.windowHeight;
 
@@ -88,7 +140,7 @@ void GenerateNRandomPoints(CTable &table, int N) {
         newPoint.x = xCoordinate;
         newPoint.y = yCoordinate;
 
-        table.points[++table.numberOfPoints] = newPoint;
+        table.points[pointIndex] = newPoint;
     }
 }
 ///-------------------------------------------------------------------------------------------------
@@ -168,19 +220,19 @@ int ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) {
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set number of points on the table ----------------------------------------------
-void setNumberOfPoints(CTable &table, int &newN) {
+void SetNumberOfPoints(CTable &table, int &newN) {
     table.settings.numberOfPoints = newN;
 }
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set if user is playing with BOT ------------------------------------------------
-void setGameWithBot(CTable &table, bool &status) {
+void SetGameWithBot(CTable &table, bool &status) {
     table.settings.isPlayingWithBot = status;
 }
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set the winning score ----------------------------------------------------------
-void setFirstToWin(CTable &table, int &firstToW) {
+void SetFirstToWin(CTable &table, int &firstToW) {
     table.settings.firstToWin = firstToW;
 }
 ///-------------------------------------------------------------------------------------------------
@@ -190,7 +242,7 @@ void StartGame(CTable &table) {
     do {
         /// ... Initializari etc
         /// Functie de clear a ecranului
-        GenerateNRandomPoints(table, table.settings.numberOfPoints);
+        GenerateNRandomPoints(table);
 
         int playerToMove = 0; // 0 - first, 1 - second
 
