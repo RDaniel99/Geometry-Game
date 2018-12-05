@@ -2,6 +2,7 @@
 #include <graphics.h>
 #include <winbgim.h>
 #include <ctime>
+#include "personalGraphic.h"
 
 using namespace std;
 
@@ -103,10 +104,9 @@ int main() {
                     cleardevice();
                     CTable table;
 
-                    table.numberOfPoints = 5;
                     table.windowHeight = 600;
                     table.windowWidth = 800;
-                    table.numberOfPoints = 20;
+                    table.numberOfPoints = 40;
                     pageIndex = 2;
 
                     GenerateNRandomPoints(table);
