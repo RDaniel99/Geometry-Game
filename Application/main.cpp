@@ -71,7 +71,6 @@ void    SetFirstToWin(CTable &table, int &firstToW);
 
 ///---------------- Main Function ------------------------------------------------------------------
 int main() {
-    cout << add(2, 3) << '\n';
     initwindow(800, 600, "Segments Game");
 
     int pageIndex = 0;
