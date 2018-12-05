@@ -16,6 +16,10 @@ struct CPoint {
 struct CSegment {
     CPoint A, B;
 };
+struct CCircle {
+    CPoint center;
+    int radius;
+};
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Settings struct of the Game ----------------------------------------------------
@@ -44,7 +48,8 @@ struct CTable {
         windowHeight    ,
         windowWidth     ,
         firstWinnings   ,
-        secondWinnings  ;
+        secondWinnings  ,
+        radiusPoints = 4;
 
     CSettings settings  ;
 };
@@ -57,9 +62,11 @@ void    GenerateNRandomPoints(CTable &table);
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry Functions -------------------------------------------------------------
-bool    IsPointOnSegment(CSegment &segment, CPoint &point) ;
-bool    SegmentsAreIntersecting(CSegment &s1, CSegment &s2);
-int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C);
+bool    IsPointOnSegment(CSegment &segment, CPoint &point)    ;
+bool    SegmentsAreIntersecting(CSegment &s1, CSegment &s2)   ;
+int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C)   ;
+bool    CheckCirclesIntersection(CCircle &c1, CCircle &c2)    ;
+int     CalculateSqDistanceBetweenPoints(CPoint &A, CPoint &B);
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- CSettings Functions ----------------------------------------------------------
@@ -71,7 +78,13 @@ void    SetFirstToWin(CTable &table, int &firstToW);
 
 ///---------------- Main Function ------------------------------------------------------------------
 int main() {
-    initwindow(800, 600, "Segments Game");
+    initwindow(600, 600, "Segments Game");
+
+    CTable table;
+
+    table.windowHeight = 600;
+    table.windowWidth = 600;
+    table.numberOfPoints = 100;
 
     int pageIndex = 0;
 
@@ -102,17 +115,13 @@ int main() {
             else {
                 if(x >= 50 && x <= 164 && y >= 100 && y <= 140 && pageIndex == 0) {
                     cleardevice();
-                    CTable table;
 
-                    table.windowHeight = 600;
-                    table.windowWidth = 800;
-                    table.numberOfPoints = 40;
                     pageIndex = 2;
 
                     GenerateNRandomPoints(table);
 
                     for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
-                        circle(table.points[pointIndex].x, table.points[pointIndex].y, 3);
+                        circle(table.points[pointIndex].x, table.points[pointIndex].y, 4);
                     }
                 }
             }
@@ -140,7 +149,34 @@ void GenerateNRandomPoints(CTable &table) {
         newPoint.x = xCoordinate;
         newPoint.y = yCoordinate;
 
-        table.points[pointIndex] = newPoint;
+        CCircle c1;
+        c1.center = newPoint;
+        c1.radius = table.radiusPoints;
+        int minX = c1.center.x - c1.radius;
+        int maxX = c1.center.x + c1.radius;
+        int minY = c1.center.y - c1.radius;
+        int maxY = c1.center.y + c1.radius;
+
+        if(minX > 0 && maxX < table.windowWidth && minY > 0 && minY < table.windowHeight) {
+            bool flag = false;
+            for(int i = 1; i < pointIndex; ++i) {
+                CCircle c2;
+                c2.center = table.points[i];
+                c2.radius = table.radiusPoints;
+
+                if(CheckCirclesIntersection(c1, c2)) {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if(flag) {
+                --pointIndex;
+            }
+            else {
+                table.points[pointIndex] = newPoint;
+            }
+        }
     }
 }
 ///-------------------------------------------------------------------------------------------------
@@ -260,5 +296,46 @@ void StartGame(CTable &table) {
             table.secondWinnings++;
         }
     } while(max(table.firstWinnings, table.secondWinnings) < table.settings.firstToWin);
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Check What Point Is Clicked ----------------------------------------------------
+
+int CheckWhatPointIsClicked(CTable &table) {
+    int x, y;
+    getmouseclick(WM_LBUTTONDOWN, x, y);
+
+    if(x < 0 && y < 0) return -1;
+
+    CCircle clickCircle;
+    clickCircle.center.x = x;
+    clickCircle.center.y = y;
+    clickCircle.radius = 0;
+
+    for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
+        CCircle pointCircle;
+        pointCircle.center = table.points[pointIndex];
+        pointCircle.radius = table.radiusPoints;
+        if(CheckCirclesIntersection(pointCircle, clickCircle)) {
+            return pointIndex;
+        }
+    }
+
+    return -1;
+}
+
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Verify Two Circles Are Intersecting --------------------------------------------
+bool CheckCirclesIntersection(CCircle &c1, CCircle &c2) {
+    return (CalculateSqDistanceBetweenPoints(c1.center, c2.center) -
+            (c1.radius + c2.radius) * (c1.radius + c2.radius)
+           ) < 0;
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Calculate Square Dist Between Two Points ---------------------------------------
+int CalculateSqDistanceBetweenPoints(CPoint &A, CPoint &B) {
+    return (A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y);
 }
 ///-------------------------------------------------------------------------------------------------
