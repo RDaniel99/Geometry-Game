@@ -2,6 +2,7 @@
 #include <graphics.h>
 #include <winbgim.h>
 #include <ctime>
+#include "personalGraphic.h"
 
 using namespace std;
 
@@ -70,6 +71,7 @@ void    SetFirstToWin(CTable &table, int &firstToW);
 
 ///---------------- Main Function ------------------------------------------------------------------
 int main() {
+    cout << add(2, 3) << '\n';
     initwindow(800, 600, "Segments Game");
 
     int pageIndex = 0;
@@ -103,10 +105,9 @@ int main() {
                     cleardevice();
                     CTable table;
 
-                    table.numberOfPoints = 5;
                     table.windowHeight = 600;
                     table.windowWidth = 800;
-                    table.numberOfPoints = 20;
+                    table.numberOfPoints = 40;
                     pageIndex = 2;
 
                     GenerateNRandomPoints(table);
