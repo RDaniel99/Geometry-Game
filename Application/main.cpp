@@ -84,7 +84,7 @@ int main() {
 
     table.windowHeight = 600;
     table.windowWidth = 600;
-    table.numberOfPoints = 100;
+    table.numberOfPoints = 25;
 
     int pageIndex = 0;
 
@@ -152,10 +152,10 @@ void GenerateNRandomPoints(CTable &table) {
         CCircle c1;
         c1.center = newPoint;
         c1.radius = table.radiusPoints;
-        int minX = c1.center.x - c1.radius;
-        int maxX = c1.center.x + c1.radius;
-        int minY = c1.center.y - c1.radius;
-        int maxY = c1.center.y + c1.radius;
+        int minX = c1.center.x - 3 * c1.radius;
+        int maxX = c1.center.x + 3 * c1.radius;
+        int minY = c1.center.y - 3 * c1.radius;
+        int maxY = c1.center.y + 3 * c1.radius;
 
         if(minX > 0 && maxX < table.windowWidth && minY > 0 && minY < table.windowHeight) {
             bool flag = false;
@@ -176,6 +176,9 @@ void GenerateNRandomPoints(CTable &table) {
             else {
                 table.points[pointIndex] = newPoint;
             }
+        }
+        else {
+            --pointIndex;
         }
     }
 }
