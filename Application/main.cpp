@@ -31,9 +31,6 @@ struct CSettings {
     int  botLevel        ;
     bool isPlayingWithBot;
     int  firstToWin      ;
-
-    char namePlayer1[MAX_NAME],
-         namePlayer2[MAX_NAME];
 };
 ///-------------------------------------------------------------------------------------------------
 
@@ -49,7 +46,8 @@ struct CTable {
         windowWidth     ,
         firstWinnings   ,
         secondWinnings  ,
-        radiusPoints = 4;
+        radiusPoints = 4,
+        gameColor    = 0;
 
     CSettings settings  ;
 };
@@ -60,6 +58,8 @@ void    StartGame(CTable &table)                ;
 bool    TheGameIsOver(CTable &table)            ;
 void    GenerateNRandomPoints(CTable &table)    ;
 int     CheckWhatPointIsClicked(CTable &table)  ;
+void    PaintPoints(CTable &table)              ;
+void    SetupTable(CTable &table)               ;
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry Functions -------------------------------------------------------------
@@ -84,7 +84,7 @@ int main() {
     CTable table;
 
     table.windowHeight = 600;
-    table.windowWidth = 600;
+    table.windowWidth = 800;
     table.numberOfPoints = 25;
 
     int pageIndex = 0;
@@ -115,22 +115,8 @@ int main() {
             }
             else {
                 if(x >= 50 && x <= 164 && y >= 100 && y <= 140 && pageIndex == 0) {
-                    cleardevice();
-
                     pageIndex = 2;
-
-                    GenerateNRandomPoints(table);
-
-                    for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
-                        circle(table.points[pointIndex].x, table.points[pointIndex].y, 4);
-                    }
-
-                    while(true) {
-                        int x = CheckWhatPointIsClicked(table);
-                        if(x != -1) {
-                            cout << x << '\n';
-                        }
-                    }
+                    StartGame(table);
                 }
             }
         }
@@ -198,7 +184,7 @@ bool TheGameIsOver(CTable &table) {
 
         if(!table.isSelected[firstPoint]) {
 
-            for(int secondPoint = 1; secondPoint <= table.numberOfPoints; ++secondPoint) {
+            for(int secondPoint = firstPoint + 1; secondPoint <= table.numberOfPoints; ++secondPoint) {
 
                 if(!table.isSelected[secondPoint]) {
                     CSegment segmentToCheck;
@@ -284,18 +270,53 @@ void SetFirstToWin(CTable &table, int &firstToW) {
 }
 ///-------------------------------------------------------------------------------------------------
 
+///---------------- Paint Points On The Table ------------------------------------------------------
+void PaintPoints(CTable &table) {
+    while(table.gameColor == table.settings.colorOfPlayer1 || table.gameColor == table.settings.colorOfPlayer2) {
+        ++table.gameColor;
+    }
+
+    for(int pInd = 1; pInd <= table.numberOfPoints; pInd++) {
+        setcolor(table.gameColor);
+        fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
+    }
+}
+///---------------- Initialize Table ---------------------------------------------------------------
+void SetupTable(CTable &table) {
+    table.numberOfSegments = 0;
+    memset(table.points, 0, sizeof(table.points));
+    memset(table.segments, 0, sizeof(table.segments));
+}
+///-------------------------------------------------------------------------------------------------
+
 ///---------------- Engine of the game -------------------------------------------------------------
 void StartGame(CTable &table) {
     do {
-        /// ... Initializari etc
-        /// Functie de clear a ecranului
+        cleardevice();
+        SetupTable(table);
         GenerateNRandomPoints(table);
+        PaintPoints(table);
 
         int playerToMove = 0; // 0 - first, 1 - second
 
         while(!TheGameIsOver(table)) {
 
-            /// ... Partea de grafica, selectie a punctelor etc
+            int firstPointIndex  = -1,
+                secondPointIndex = -1;
+
+            while(secondPointIndex < 0) {
+                int x = CheckWhatPointIsClicked(table);
+                if(x != -1) {
+                    if(firstPointIndex == -1) {
+                        firstPointIndex = x;
+                    }
+                    else {
+                        secondPointIndex = x;
+                    }
+                }
+            }
+
+            cout << "Player " << playerToMove + 1 << " has selected Points: " << firstPointIndex << ' ' << secondPointIndex << '\n';
 
             playerToMove = 1 - playerToMove;
         }
