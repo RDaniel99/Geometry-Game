@@ -56,9 +56,10 @@ struct CTable {
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Game Engine Functions ----------------------------------------------------------
-void    StartGame(CTable &table)            ;
-bool    TheGameIsOver(CTable &table)        ;
-void    GenerateNRandomPoints(CTable &table);
+void    StartGame(CTable &table)                ;
+bool    TheGameIsOver(CTable &table)            ;
+void    GenerateNRandomPoints(CTable &table)    ;
+int     CheckWhatPointIsClicked(CTable &table)  ;
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry Functions -------------------------------------------------------------
@@ -122,6 +123,13 @@ int main() {
 
                     for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
                         circle(table.points[pointIndex].x, table.points[pointIndex].y, 4);
+                    }
+
+                    while(true) {
+                        int x = CheckWhatPointIsClicked(table);
+                        if(x != -1) {
+                            cout << x << '\n';
+                        }
                     }
                 }
             }
