@@ -68,24 +68,28 @@ bool    SegmentsAreIntersecting(CSegment &s1, CSegment &s2)   ;
 int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C)   ;
 bool    CheckCirclesIntersection(CCircle &c1, CCircle &c2)    ;
 int     CalculateSqDistanceBetweenPoints(CPoint &A, CPoint &B);
+bool    CheckIfSegmentCanBePlaced(CTable &table,
+                                  int &firstPointIndex,
+                                  int &secondPointIndex)      ;
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- CSettings Functions ----------------------------------------------------------
-void    SetNumberOfPoints(CTable &table, int &newN);
-void    SetGameWithBot(CTable &table, bool &status);
-void    SetFirstToWin(CTable &table, int &firstToW);
+void    SetNumberOfPoints(CTable &table, int newN);
+void    SetGameWithBot(CTable &table, bool status);
+void    SetFirstToWin(CTable &table, int firstToW);
 ///-------------------------------------------------------------------------------------------------
 
 
 ///---------------- Main Function ------------------------------------------------------------------
 int main() {
-    initwindow(600, 600, "Segments Game");
+    initwindow(600, 800, "Segments Game");
 
     CTable table;
 
-    table.windowHeight = 600;
-    table.windowWidth = 800;
-    table.numberOfPoints = 25;
+    table.windowHeight = 800;
+    table.windowWidth = 600;
+    SetNumberOfPoints(table, 10);
+    SetFirstToWin(table, 2);
 
     int pageIndex = 0;
 
@@ -178,6 +182,25 @@ void GenerateNRandomPoints(CTable &table) {
 }
 ///-------------------------------------------------------------------------------------------------
 
+///---------------- Check if a segment can be placed -----------------------------------------------
+bool CheckIfSegmentCanBePlaced(CTable &table, int &firstPointIndex, int &secondPointIndex) {
+    if(table.isSelected[firstPointIndex])  return false;
+    if(table.isSelected[secondPointIndex]) return false;
+
+    CSegment segmentToCheck;
+    segmentToCheck.A = table.points[firstPointIndex] ;
+    segmentToCheck.B = table.points[secondPointIndex];
+
+    for(int segmentIndex = 1; segmentIndex <= table.numberOfSegments; ++segmentIndex) {
+        if(SegmentsAreIntersecting(segmentToCheck, table.segments[segmentIndex]) == true) {
+            return false;
+        }
+    }
+
+    return true;
+}
+///-------------------------------------------------------------------------------------------------
+
 ///---------------- Check if the game is over ------------------------------------------------------
 bool TheGameIsOver(CTable &table) {
     for(int firstPoint = 1; firstPoint <= table.numberOfPoints; ++firstPoint) {
@@ -187,19 +210,7 @@ bool TheGameIsOver(CTable &table) {
             for(int secondPoint = firstPoint + 1; secondPoint <= table.numberOfPoints; ++secondPoint) {
 
                 if(!table.isSelected[secondPoint]) {
-                    CSegment segmentToCheck;
-                    segmentToCheck.A = table.points[firstPoint];
-                    segmentToCheck.B = table.points[secondPoint];
-
-                    bool flag = false;
-                    for(int segmentIndex = 1; segmentIndex <= table.numberOfSegments; ++segmentIndex) {
-                        if(SegmentsAreIntersecting(segmentToCheck, table.segments[segmentIndex]) == true) {
-                            flag = true;
-                            break;
-                        }
-                    }
-
-                    if(!flag) {
+                    if(CheckIfSegmentCanBePlaced(table, firstPoint, secondPoint)) {
                         return false;
                     }
                 }
@@ -253,19 +264,19 @@ int ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) {
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set number of points on the table ----------------------------------------------
-void SetNumberOfPoints(CTable &table, int &newN) {
-    table.settings.numberOfPoints = newN;
+void SetNumberOfPoints(CTable &table, int newN) {
+    table.numberOfPoints = newN;
 }
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set if user is playing with BOT ------------------------------------------------
-void SetGameWithBot(CTable &table, bool &status) {
+void SetGameWithBot(CTable &table, bool status) {
     table.settings.isPlayingWithBot = status;
 }
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set the winning score ----------------------------------------------------------
-void SetFirstToWin(CTable &table, int &firstToW) {
+void SetFirstToWin(CTable &table, int firstToW) {
     table.settings.firstToWin = firstToW;
 }
 ///-------------------------------------------------------------------------------------------------
@@ -283,9 +294,13 @@ void PaintPoints(CTable &table) {
 }
 ///---------------- Initialize Table ---------------------------------------------------------------
 void SetupTable(CTable &table) {
-    table.numberOfSegments = 0;
-    memset(table.points, 0, sizeof(table.points));
-    memset(table.segments, 0, sizeof(table.segments));
+    table.numberOfSegments  = 0;
+    table.firstWinnings     = 0;
+    table.secondWinnings    = 0;
+
+    memset(table.points,     0, sizeof(table.points))    ;
+    memset(table.segments,   0, sizeof(table.segments))  ;
+    memset(table.isSelected, 0, sizeof(table.isSelected));
 }
 ///-------------------------------------------------------------------------------------------------
 
@@ -316,18 +331,28 @@ void StartGame(CTable &table) {
                 }
             }
 
-            cout << "Player " << playerToMove + 1 << " has selected Points: " << firstPointIndex << ' ' << secondPointIndex << '\n';
-
-            playerToMove = 1 - playerToMove;
+            if(CheckIfSegmentCanBePlaced(table, firstPointIndex, secondPointIndex) == true) {
+                cout << "Player " << playerToMove + 1 << " can place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
+                table.isSelected[firstPointIndex]  = true;
+                table.isSelected[secondPointIndex] = true;
+                playerToMove = 1 - playerToMove;
+            }
+            else {
+                cout << "Player " << playerToMove + 1 << "can NOT place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
+            }
         }
 
         if(!playerToMove) {
+            cout << "First Player Wins\n";
             table.firstWinnings++;
         }
         else {
+            cout << "Second player Wins\n";
             table.secondWinnings++;
         }
     } while(max(table.firstWinnings, table.secondWinnings) < table.settings.firstToWin);
+
+    cout << "[DBG] Stop Game...\n";
 }
 ///-------------------------------------------------------------------------------------------------
 
