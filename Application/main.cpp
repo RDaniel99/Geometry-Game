@@ -88,7 +88,7 @@ int main() {
 
     table.windowHeight = 800;
     table.windowWidth = 600;
-    SetNumberOfPoints(table, 10);
+    SetNumberOfPoints(table, 15);
     SetFirstToWin(table, 2);
 
     int pageIndex = 0;
@@ -335,6 +335,11 @@ void StartGame(CTable &table) {
                 cout << "Player " << playerToMove + 1 << " can place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
                 table.isSelected[firstPointIndex]  = true;
                 table.isSelected[secondPointIndex] = true;
+                setcolor(WHITE);
+                line(table.points[firstPointIndex].x, table.points[firstPointIndex].y,
+                     table.points[secondPointIndex].x, table.points[secondPointIndex].y);
+                table.segments[++table.numberOfSegments].A = table.points[firstPointIndex];
+                table.segments[table.numberOfSegments].B = table.points[secondPointIndex];
                 playerToMove = 1 - playerToMove;
             }
             else {
