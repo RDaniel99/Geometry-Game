@@ -51,7 +51,6 @@ struct CTable {
     bool     isSelected[MAX_POINTS] ; // 'isSelected[i] = true' only when 'i' is already in a segment
 
     int numberOfSegments,
-        numberOfPoints  ,
         windowHeight    ,
         windowWidth     ,
         firstWinnings   ,
@@ -143,7 +142,7 @@ int main() {
 void GenerateNRandomPoints(CTable &table) {
     srand(time(NULL));
 
-    for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
+    for(int pointIndex = 1; pointIndex <= table.settings.numberOfPoints; ++pointIndex) {
         int xCoordinate = rand() % table.windowWidth ;
         int yCoordinate = rand() % table.windowHeight;
 
@@ -209,11 +208,11 @@ bool CheckIfSegmentCanBePlaced(CTable &table, int &firstPointIndex, int &secondP
 
 ///---------------- Check if the game is over ------------------------------------------------------
 bool TheGameIsOver(CTable &table) {
-    for(int firstPoint = 1; firstPoint <= table.numberOfPoints; ++firstPoint) {
+    for(int firstPoint = 1; firstPoint <= table.settings.numberOfPoints; ++firstPoint) {
 
         if(!table.isSelected[firstPoint]) {
 
-            for(int secondPoint = firstPoint + 1; secondPoint <= table.numberOfPoints; ++secondPoint) {
+            for(int secondPoint = firstPoint + 1; secondPoint <= table.settings.numberOfPoints; ++secondPoint) {
 
                 if(!table.isSelected[secondPoint]) {
                     if(CheckIfSegmentCanBePlaced(table, firstPoint, secondPoint)) {
@@ -271,7 +270,7 @@ int ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) {
 
 ///---------------- Set number of points on the table ----------------------------------------------
 void SetNumberOfPoints(CTable &table, int newN) {
-    table.numberOfPoints = newN;
+    table.settings.numberOfPoints = newN;
 }
 ///-------------------------------------------------------------------------------------------------
 
@@ -289,7 +288,7 @@ void SetFirstToWin(CTable &table, int firstToW) {
 
 ///---------------- Paint Points On The Table ------------------------------------------------------
 void PaintPoints(CTable &table) {
-    for(int pInd = 1; pInd <= table.numberOfPoints; pInd++) {
+    for(int pInd = 1; pInd <= table.settings.numberOfPoints; pInd++) {
         setcolor(WHITE);
         fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
     }
@@ -385,7 +384,7 @@ int CheckWhatPointIsClicked(CTable &table) {
     clickCircle.center.y = y;
     clickCircle.radius = 0;
 
-    for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
+    for(int pointIndex = 1; pointIndex <= table.settings.numberOfPoints; ++pointIndex) {
         CCircle pointCircle;
         pointCircle.center = table.points[pointIndex];
         pointCircle.radius = table.radiusPoints;
@@ -413,6 +412,7 @@ int CalculateSqDistanceBetweenPoints(CPoint &A, CPoint &B) {
 }
 ///-------------------------------------------------------------------------------------------------
 
+///---------------- Paint Line between Two Given Points Indexes ------------------------------------
 void PaintLinePts(CTable &table, int &pIndex1, int &pIndex2) {
     table.isSelected[pIndex1]  = true;
     table.isSelected[pIndex2] = true;
@@ -426,3 +426,4 @@ void PaintLinePts(CTable &table, int &pIndex1, int &pIndex2) {
     table.segments[table.numberOfSegments].A = table.points[pIndex1] ;
     table.segments[table.numberOfSegments].B = table.points[pIndex2];
 }
+///-------------------------------------------------------------------------------------------------
