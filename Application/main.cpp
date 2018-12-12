@@ -71,6 +71,9 @@ void    PaintPoints(CTable &table)              ;
 void    SetupTable(CTable &table)               ;
 void    PaintLinePts(CTable &table,
                      int &pIndex1, int &pIndex2);
+int     ChooseMoveBotEasy(CTable &table)        ;
+int     ChooseMoveBotHard(CTable &table)        ;
+int     GetMove(CTable &table, int &playerTurn) ;
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry Functions -------------------------------------------------------------
@@ -85,9 +88,10 @@ bool    CheckIfSegmentCanBePlaced(CTable &table,
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- CSettings Functions ----------------------------------------------------------
-void    SetNumberOfPoints(CTable &table, int newN);
-void    SetGameWithBot(CTable &table, bool status);
-void    SetFirstToWin(CTable &table, int firstToW);
+void    SetNumberOfPoints(CTable &table, int  newN)     ;
+void    SetGameWithBot   (CTable &table, bool status)   ;
+void    SetFirstToWin    (CTable &table, int  firstToW) ;
+void    SetBotLevel      (CTable &table, int  botLevel) ;
 ///-------------------------------------------------------------------------------------------------
 
 
@@ -101,6 +105,8 @@ int main() {
     table.windowWidth = 600;
     SetNumberOfPoints(table, 15);
     SetFirstToWin(table, 2);
+    SetGameWithBot(table, true);
+    SetBotLevel(table, 1);
 
     outtextxy(300, 0, "Welcome to Segments Game");
 
@@ -286,6 +292,12 @@ void SetFirstToWin(CTable &table, int firstToW) {
 }
 ///-------------------------------------------------------------------------------------------------
 
+///---------------- Set the bot level --------------------------------------------------------------
+void SetBotLevel(CTable &table, int botLevel) {
+    table.settings.botLevel = botLevel;
+}
+///-------------------------------------------------------------------------------------------------
+
 ///---------------- Paint Points On The Table ------------------------------------------------------
 void PaintPoints(CTable &table) {
     for(int pInd = 1; pInd <= table.settings.numberOfPoints; pInd++) {
@@ -321,7 +333,7 @@ void StartGame(CTable &table) {
                 secondPointIndex = -1;
 
             while(secondPointIndex < 0) {
-                int x = CheckWhatPointIsClicked(table);
+                int x = GetMove(table, playerToMove);
                 if(x != -1) {
                     if(table.isSelected[x] == false) {
                         if(firstPointIndex == -1) {
@@ -425,5 +437,49 @@ void PaintLinePts(CTable &table, int &pIndex1, int &pIndex2) {
     ++table.numberOfSegments;
     table.segments[table.numberOfSegments].A = table.points[pIndex1] ;
     table.segments[table.numberOfSegments].B = table.points[pIndex2];
+}
+///-------------------------------------------------------------------------------------------------
+
+///----------------- Choose Bot Level Easy Move ----------------------------------------------------
+int ChooseMoveBotEasy(CTable &table) {
+    int indexChosen = rand() % table.settings.numberOfPoints + 1;
+
+    while(table.isSelected[indexChosen] == true) {
+        ++indexChosen;
+        if(indexChosen == table.settings.numberOfPoints + 1) {
+            indexChosen = 1;
+        }
+    }
+
+    return indexChosen;
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Get Move of the Current Player -------------------------------------------------
+int GetMove(CTable &table, int &playerTurn) {
+    if(playerTurn == 1 && table.settings.isPlayingWithBot == true) {
+        if(table.settings.botLevel == 1) {
+            return ChooseMoveBotEasy(table);
+        }
+
+        return ChooseMoveBotHard(table);
+    }
+
+    return CheckWhatPointIsClicked(table);
+}
+///-------------------------------------------------------------------------------------------------
+
+///----------------- Choose Bot Level Hard Move ----------------------------------------------------
+int ChooseMoveBotHard(CTable &table) {
+    int indexChosen = rand() % table.settings.numberOfPoints + 1;
+
+    while(table.isSelected[indexChosen] == true) {
+        ++indexChosen;
+        if(indexChosen == table.settings.numberOfPoints + 1) {
+            indexChosen = 1;
+        }
+    }
+
+    return indexChosen;
 }
 ///-------------------------------------------------------------------------------------------------
