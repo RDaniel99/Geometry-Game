@@ -184,8 +184,9 @@ void GenerateNRandomPoints(CTable &table) {
 
 ///---------------- Check if a segment can be placed -----------------------------------------------
 bool CheckIfSegmentCanBePlaced(CTable &table, int &firstPointIndex, int &secondPointIndex) {
-    if(table.isSelected[firstPointIndex])  return false;
-    if(table.isSelected[secondPointIndex]) return false;
+    if(firstPointIndex == secondPointIndex  ) return false;
+    if(table.isSelected[firstPointIndex]    ) return false;
+    if(table.isSelected[secondPointIndex]   ) return false;
 
     CSegment segmentToCheck;
     segmentToCheck.A = table.points[firstPointIndex] ;
@@ -283,20 +284,14 @@ void SetFirstToWin(CTable &table, int firstToW) {
 
 ///---------------- Paint Points On The Table ------------------------------------------------------
 void PaintPoints(CTable &table) {
-    while(table.gameColor == table.settings.colorOfPlayer1 || table.gameColor == table.settings.colorOfPlayer2) {
-        ++table.gameColor;
-    }
-
     for(int pInd = 1; pInd <= table.numberOfPoints; pInd++) {
-        setcolor(table.gameColor);
+        setcolor(WHITE);
         fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
     }
 }
 ///---------------- Initialize Table ---------------------------------------------------------------
 void SetupTable(CTable &table) {
     table.numberOfSegments  = 0;
-    table.firstWinnings     = 0;
-    table.secondWinnings    = 0;
 
     memset(table.points,     0, sizeof(table.points))    ;
     memset(table.segments,   0, sizeof(table.segments))  ;
@@ -306,6 +301,8 @@ void SetupTable(CTable &table) {
 
 ///---------------- Engine of the game -------------------------------------------------------------
 void StartGame(CTable &table) {
+    table.firstWinnings = 0;
+    table.secondWinnings = 0;
     do {
         cleardevice();
         SetupTable(table);
@@ -324,9 +321,13 @@ void StartGame(CTable &table) {
                 if(x != -1) {
                     if(firstPointIndex == -1) {
                         firstPointIndex = x;
+                        setcolor(RED);
+                        fillellipse(table.points[firstPointIndex].x , table.points[firstPointIndex].y , table.radiusPoints, table.radiusPoints);
                     }
                     else {
                         secondPointIndex = x;
+                        setcolor(RED);
+                        fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
                     }
                 }
             }
@@ -335,7 +336,7 @@ void StartGame(CTable &table) {
                 cout << "Player " << playerToMove + 1 << " can place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
                 table.isSelected[firstPointIndex]  = true;
                 table.isSelected[secondPointIndex] = true;
-                setcolor(WHITE);
+                setcolor(RED);
                 line(table.points[firstPointIndex].x, table.points[firstPointIndex].y,
                      table.points[secondPointIndex].x, table.points[secondPointIndex].y);
                 table.segments[++table.numberOfSegments].A = table.points[firstPointIndex];
@@ -344,10 +345,13 @@ void StartGame(CTable &table) {
             }
             else {
                 cout << "Player " << playerToMove + 1 << "can NOT place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
+                setcolor(WHITE);
+                fillellipse(table.points[firstPointIndex].x , table.points[firstPointIndex].y , table.radiusPoints, table.radiusPoints);
+                fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
             }
         }
 
-        if(!playerToMove) {
+        if(playerToMove) {
             cout << "First Player Wins\n";
             table.firstWinnings++;
         }
@@ -355,6 +359,7 @@ void StartGame(CTable &table) {
             cout << "Second player Wins\n";
             table.secondWinnings++;
         }
+        cout << table.firstWinnings << ' ' << table.secondWinnings << ' ' << table.settings.firstToWin << '\n';
     } while(max(table.firstWinnings, table.secondWinnings) < table.settings.firstToWin);
 
     cout << "[DBG] Stop Game...\n";
