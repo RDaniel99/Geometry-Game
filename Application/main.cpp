@@ -9,6 +9,15 @@ using namespace std;
 #define MAX_POINTS 105
 #define MAX_NAME   25
 
+///---------------- Pages Variables ----------------------------------------------------------------
+int mainPage;
+int settingsPage;
+int chooseColorPage;
+int chooseGameTypePage;
+int chooseNumberOfPointsPage;
+int gamePage;
+///-------------------------------------------------------------------------------------------------
+
 ///---------------- Geometry structs ---------------------------------------------------------------
 struct CPoint {
     int x, y;
@@ -82,7 +91,7 @@ void    SetFirstToWin(CTable &table, int firstToW);
 
 ///---------------- Main Function ------------------------------------------------------------------
 int main() {
-    initwindow(600, 800, "Segments Game");
+    mainPage = initwindow(600, 800, "Segments Game");
 
     CTable table;
 
@@ -90,14 +99,6 @@ int main() {
     table.windowWidth = 600;
     SetNumberOfPoints(table, 15);
     SetFirstToWin(table, 2);
-
-    int pageIndex = 0;
-
-    /*
-    0 - Main Page
-    1 - Settings Page
-    2 - Game Page
-    */
 
     outtextxy(300, 0, "Welcome to Segments Game");
 
@@ -112,14 +113,15 @@ int main() {
         getmouseclick(WM_LBUTTONDOWN, x, y);
 
         if(!(x < 0 && y < 0)) {
-            if(x >= 50 && x <= 164 && y >= 50 && y <= 90 && pageIndex == 0) {
-                cleardevice();
+            if(x >= 50 && x <= 164 && y >= 50 && y <= 90 && getcurrentwindow() == mainPage) {
+                settingsPage = initwindow(600, 800, "Settings Page");
+                setcurrentwindow(settingsPage);
                 outtextxy(10, 10, "Settings Page. In Progress...");
-                pageIndex = 1;
             }
             else {
-                if(x >= 50 && x <= 164 && y >= 100 && y <= 140 && pageIndex == 0) {
-                    pageIndex = 2;
+                if(x >= 50 && x <= 164 && y >= 100 && y <= 140 && getcurrentwindow() == mainPage) {
+                    gamePage = initwindow(600, 800, "Game Play");
+                    setcurrentwindow(gamePage);
                     StartGame(table);
                 }
             }
@@ -363,6 +365,9 @@ void StartGame(CTable &table) {
     } while(max(table.firstWinnings, table.secondWinnings) < table.settings.firstToWin);
 
     cout << "[DBG] Stop Game...\n";
+
+    setcurrentwindow(mainPage);
+    closegraph(gamePage);
 }
 ///-------------------------------------------------------------------------------------------------
 
