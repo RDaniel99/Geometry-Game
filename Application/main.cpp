@@ -9,12 +9,25 @@ using namespace std;
 #define MAX_POINTS 105
 #define MAX_NAME   25
 
+///---------------- Pages Variables ----------------------------------------------------------------
+int mainPage;
+int settingsPage;
+int chooseColorPage;
+int chooseGameTypePage;
+int chooseNumberOfPointsPage;
+int gamePage;
+///-------------------------------------------------------------------------------------------------
+
 ///---------------- Geometry structs ---------------------------------------------------------------
 struct CPoint {
     int x, y;
 };
 struct CSegment {
     CPoint A, B;
+};
+struct CCircle {
+    CPoint center;
+    int radius;
 };
 ///-------------------------------------------------------------------------------------------------
 
@@ -27,9 +40,6 @@ struct CSettings {
     int  botLevel        ;
     bool isPlayingWithBot;
     int  firstToWin      ;
-
-    char namePlayer1[MAX_NAME],
-         namePlayer2[MAX_NAME];
 };
 ///-------------------------------------------------------------------------------------------------
 
@@ -44,42 +54,51 @@ struct CTable {
         windowHeight    ,
         windowWidth     ,
         firstWinnings   ,
-        secondWinnings  ;
+        secondWinnings  ,
+        radiusPoints = 4,
+        gameColor    = 0;
 
     CSettings settings  ;
 };
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Game Engine Functions ----------------------------------------------------------
-void    StartGame(CTable &table)            ;
-bool    TheGameIsOver(CTable &table)        ;
-void    GenerateNRandomPoints(CTable &table);
+void    StartGame(CTable &table)                ;
+bool    TheGameIsOver(CTable &table)            ;
+void    GenerateNRandomPoints(CTable &table)    ;
+int     CheckWhatPointIsClicked(CTable &table)  ;
+void    PaintPoints(CTable &table)              ;
+void    SetupTable(CTable &table)               ;
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry Functions -------------------------------------------------------------
-bool    IsPointOnSegment(CSegment &segment, CPoint &point) ;
-bool    SegmentsAreIntersecting(CSegment &s1, CSegment &s2);
-int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C);
+bool    IsPointOnSegment(CSegment &segment, CPoint &point)    ;
+bool    SegmentsAreIntersecting(CSegment &s1, CSegment &s2)   ;
+int     ComputeOrientation(CPoint &A, CPoint &B, CPoint &C)   ;
+bool    CheckCirclesIntersection(CCircle &c1, CCircle &c2)    ;
+int     CalculateSqDistanceBetweenPoints(CPoint &A, CPoint &B);
+bool    CheckIfSegmentCanBePlaced(CTable &table,
+                                  int &firstPointIndex,
+                                  int &secondPointIndex)      ;
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- CSettings Functions ----------------------------------------------------------
-void    SetNumberOfPoints(CTable &table, int &newN);
-void    SetGameWithBot(CTable &table, bool &status);
-void    SetFirstToWin(CTable &table, int &firstToW);
+void    SetNumberOfPoints(CTable &table, int newN);
+void    SetGameWithBot(CTable &table, bool status);
+void    SetFirstToWin(CTable &table, int firstToW);
 ///-------------------------------------------------------------------------------------------------
 
 
 ///---------------- Main Function ------------------------------------------------------------------
 int main() {
-    initwindow(800, 600, "Segments Game");
+    mainPage = initwindow(600, 800, "Segments Game");
 
-    int pageIndex = 0;
+    CTable table;
 
-    /*
-    0 - Main Page
-    1 - Settings Page
-    2 - Game Page
-    */
+    table.windowHeight = 800;
+    table.windowWidth = 600;
+    SetNumberOfPoints(table, 15);
+    SetFirstToWin(table, 2);
 
     outtextxy(300, 0, "Welcome to Segments Game");
 
@@ -94,26 +113,16 @@ int main() {
         getmouseclick(WM_LBUTTONDOWN, x, y);
 
         if(!(x < 0 && y < 0)) {
-            if(x >= 50 && x <= 164 && y >= 50 && y <= 90 && pageIndex == 0) {
-                cleardevice();
+            if(x >= 50 && x <= 164 && y >= 50 && y <= 90 && getcurrentwindow() == mainPage) {
+                settingsPage = initwindow(600, 800, "Settings Page");
+                setcurrentwindow(settingsPage);
                 outtextxy(10, 10, "Settings Page. In Progress...");
-                pageIndex = 1;
             }
             else {
-                if(x >= 50 && x <= 164 && y >= 100 && y <= 140 && pageIndex == 0) {
-                    cleardevice();
-                    CTable table;
-
-                    table.windowHeight = 600;
-                    table.windowWidth = 800;
-                    table.numberOfPoints = 40;
-                    pageIndex = 2;
-
-                    GenerateNRandomPoints(table);
-
-                    for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
-                        circle(table.points[pointIndex].x, table.points[pointIndex].y, 3);
-                    }
+                if(x >= 50 && x <= 164 && y >= 100 && y <= 140 && getcurrentwindow() == mainPage) {
+                    gamePage = initwindow(600, 800, "Game Play");
+                    setcurrentwindow(gamePage);
+                    StartGame(table);
                 }
             }
         }
@@ -140,8 +149,58 @@ void GenerateNRandomPoints(CTable &table) {
         newPoint.x = xCoordinate;
         newPoint.y = yCoordinate;
 
-        table.points[pointIndex] = newPoint;
+        CCircle c1;
+        c1.center = newPoint;
+        c1.radius = table.radiusPoints;
+        int minX = c1.center.x - 3 * c1.radius;
+        int maxX = c1.center.x + 3 * c1.radius;
+        int minY = c1.center.y - 3 * c1.radius;
+        int maxY = c1.center.y + 3 * c1.radius;
+
+        if(minX > 0 && maxX < table.windowWidth && minY > 0 && minY < table.windowHeight) {
+            bool flag = false;
+            for(int i = 1; i < pointIndex; ++i) {
+                CCircle c2;
+                c2.center = table.points[i];
+                c2.radius = table.radiusPoints;
+
+                if(CheckCirclesIntersection(c1, c2)) {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if(flag) {
+                --pointIndex;
+            }
+            else {
+                table.points[pointIndex] = newPoint;
+            }
+        }
+        else {
+            --pointIndex;
+        }
     }
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Check if a segment can be placed -----------------------------------------------
+bool CheckIfSegmentCanBePlaced(CTable &table, int &firstPointIndex, int &secondPointIndex) {
+    if(firstPointIndex == secondPointIndex  ) return false;
+    if(table.isSelected[firstPointIndex]    ) return false;
+    if(table.isSelected[secondPointIndex]   ) return false;
+
+    CSegment segmentToCheck;
+    segmentToCheck.A = table.points[firstPointIndex] ;
+    segmentToCheck.B = table.points[secondPointIndex];
+
+    for(int segmentIndex = 1; segmentIndex <= table.numberOfSegments; ++segmentIndex) {
+        if(SegmentsAreIntersecting(segmentToCheck, table.segments[segmentIndex]) == true) {
+            return false;
+        }
+    }
+
+    return true;
 }
 ///-------------------------------------------------------------------------------------------------
 
@@ -151,22 +210,10 @@ bool TheGameIsOver(CTable &table) {
 
         if(!table.isSelected[firstPoint]) {
 
-            for(int secondPoint = 1; secondPoint <= table.numberOfPoints; ++secondPoint) {
+            for(int secondPoint = firstPoint + 1; secondPoint <= table.numberOfPoints; ++secondPoint) {
 
                 if(!table.isSelected[secondPoint]) {
-                    CSegment segmentToCheck;
-                    segmentToCheck.A = table.points[firstPoint];
-                    segmentToCheck.B = table.points[secondPoint];
-
-                    bool flag = false;
-                    for(int segmentIndex = 1; segmentIndex <= table.numberOfSegments; ++segmentIndex) {
-                        if(SegmentsAreIntersecting(segmentToCheck, table.segments[segmentIndex]) == true) {
-                            flag = true;
-                            break;
-                        }
-                    }
-
-                    if(!flag) {
+                    if(CheckIfSegmentCanBePlaced(table, firstPoint, secondPoint)) {
                         return false;
                     }
                 }
@@ -220,45 +267,147 @@ int ComputeOrientation(CPoint &A, CPoint &B, CPoint &C) {
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set number of points on the table ----------------------------------------------
-void SetNumberOfPoints(CTable &table, int &newN) {
-    table.settings.numberOfPoints = newN;
+void SetNumberOfPoints(CTable &table, int newN) {
+    table.numberOfPoints = newN;
 }
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set if user is playing with BOT ------------------------------------------------
-void SetGameWithBot(CTable &table, bool &status) {
+void SetGameWithBot(CTable &table, bool status) {
     table.settings.isPlayingWithBot = status;
 }
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Set the winning score ----------------------------------------------------------
-void SetFirstToWin(CTable &table, int &firstToW) {
+void SetFirstToWin(CTable &table, int firstToW) {
     table.settings.firstToWin = firstToW;
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Paint Points On The Table ------------------------------------------------------
+void PaintPoints(CTable &table) {
+    for(int pInd = 1; pInd <= table.numberOfPoints; pInd++) {
+        setcolor(WHITE);
+        fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
+    }
+}
+///---------------- Initialize Table ---------------------------------------------------------------
+void SetupTable(CTable &table) {
+    table.numberOfSegments  = 0;
+
+    memset(table.points,     0, sizeof(table.points))    ;
+    memset(table.segments,   0, sizeof(table.segments))  ;
+    memset(table.isSelected, 0, sizeof(table.isSelected));
 }
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Engine of the game -------------------------------------------------------------
 void StartGame(CTable &table) {
+    table.firstWinnings = 0;
+    table.secondWinnings = 0;
     do {
-        /// ... Initializari etc
-        /// Functie de clear a ecranului
+        cleardevice();
+        SetupTable(table);
         GenerateNRandomPoints(table);
+        PaintPoints(table);
 
         int playerToMove = 0; // 0 - first, 1 - second
 
         while(!TheGameIsOver(table)) {
 
-            /// ... Partea de grafica, selectie a punctelor etc
+            int firstPointIndex  = -1,
+                secondPointIndex = -1;
 
-            playerToMove = 1 - playerToMove;
+            while(secondPointIndex < 0) {
+                int x = CheckWhatPointIsClicked(table);
+                if(x != -1) {
+                    if(firstPointIndex == -1) {
+                        firstPointIndex = x;
+                        setcolor(RED);
+                        fillellipse(table.points[firstPointIndex].x , table.points[firstPointIndex].y , table.radiusPoints, table.radiusPoints);
+                    }
+                    else {
+                        secondPointIndex = x;
+                        setcolor(RED);
+                        fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
+                    }
+                }
+            }
+
+            if(CheckIfSegmentCanBePlaced(table, firstPointIndex, secondPointIndex) == true) {
+                cout << "Player " << playerToMove + 1 << " can place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
+                table.isSelected[firstPointIndex]  = true;
+                table.isSelected[secondPointIndex] = true;
+                setcolor(RED);
+                line(table.points[firstPointIndex].x, table.points[firstPointIndex].y,
+                     table.points[secondPointIndex].x, table.points[secondPointIndex].y);
+                table.segments[++table.numberOfSegments].A = table.points[firstPointIndex];
+                table.segments[table.numberOfSegments].B = table.points[secondPointIndex];
+                playerToMove = 1 - playerToMove;
+            }
+            else {
+                cout << "Player " << playerToMove + 1 << "can NOT place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
+                setcolor(WHITE);
+                fillellipse(table.points[firstPointIndex].x , table.points[firstPointIndex].y , table.radiusPoints, table.radiusPoints);
+                fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
+            }
         }
 
-        if(!playerToMove) {
+        if(playerToMove) {
+            cout << "First Player Wins\n";
             table.firstWinnings++;
         }
         else {
+            cout << "Second player Wins\n";
             table.secondWinnings++;
         }
+        cout << table.firstWinnings << ' ' << table.secondWinnings << ' ' << table.settings.firstToWin << '\n';
     } while(max(table.firstWinnings, table.secondWinnings) < table.settings.firstToWin);
+
+    cout << "[DBG] Stop Game...\n";
+
+    setcurrentwindow(mainPage);
+    closegraph(gamePage);
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Check What Point Is Clicked ----------------------------------------------------
+
+int CheckWhatPointIsClicked(CTable &table) {
+    int x, y;
+    getmouseclick(WM_LBUTTONDOWN, x, y);
+
+    if(x < 0 && y < 0) return -1;
+
+    CCircle clickCircle;
+    clickCircle.center.x = x;
+    clickCircle.center.y = y;
+    clickCircle.radius = 0;
+
+    for(int pointIndex = 1; pointIndex <= table.numberOfPoints; ++pointIndex) {
+        CCircle pointCircle;
+        pointCircle.center = table.points[pointIndex];
+        pointCircle.radius = table.radiusPoints;
+        if(CheckCirclesIntersection(pointCircle, clickCircle)) {
+            return pointIndex;
+        }
+    }
+
+    return -1;
+}
+
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Verify Two Circles Are Intersecting --------------------------------------------
+bool CheckCirclesIntersection(CCircle &c1, CCircle &c2) {
+    return (CalculateSqDistanceBetweenPoints(c1.center, c2.center) -
+            (c1.radius + c2.radius) * (c1.radius + c2.radius)
+           ) < 0;
+}
+///-------------------------------------------------------------------------------------------------
+
+///---------------- Calculate Square Dist Between Two Points ---------------------------------------
+int CalculateSqDistanceBetweenPoints(CPoint &A, CPoint &B) {
+    return (A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y);
 }
 ///-------------------------------------------------------------------------------------------------
