@@ -1,2 +1,3 @@
 # projectip
-Project13
+
+Flow of the project: https://kanbanflow.com/board/ejSVD1
