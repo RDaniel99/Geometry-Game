@@ -2,6 +2,7 @@
 #include <graphics.h>
 #include <winbgim.h>
 #include <ctime>
+#include <fstream>
 #include "personalGraphic.h"
 
 using namespace std;
@@ -101,16 +102,27 @@ void    SetBotLevel      (CTable &table, int  botLevel) ;
 
 ///---------------- Main Function ------------------------------------------------------------------
 int main() {
-    mainPage = initwindow(600, 800, "Segments Game");
+
+    mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
+
+    ifstream fin("settings.txt");
 
     CTable table;
+    CSettings tempSettings;
 
-    table.windowHeight = 800;
-    table.windowWidth = 600;
-    SetNumberOfPoints(table, 15);
-    SetFirstToWin(table, 2);
-    SetGameWithBot(table, true);
-    SetBotLevel(table, 1);
+    fin >> tempSettings.botLevel;
+    fin >> tempSettings.colorOfPlayer1;
+    fin >> tempSettings.colorOfPlayer2;
+    fin >> tempSettings.firstToWin;
+    fin >> tempSettings.isPlayingWithBot;
+    fin >> tempSettings.numberOfPoints;
+
+    fin.close();
+
+    table.settings = tempSettings;
+
+    table.windowHeight = DEFAULT_HEIGHT;
+    table.windowWidth  = DEFAULT_WIDTH ;
 
     outtextxy(300, 0, "Welcome to Segments Game");
 
@@ -120,11 +132,15 @@ int main() {
     rectangle(50, 100, 164, 140);
     outtextxy(90, 110, "Play");
 
+    rectangle(50, 300, 164, 340);
+    outtextxy(90, 310, "Exit");
+
     while(true) {
         int x, y;
         getmouseclick(WM_LBUTTONDOWN, x, y);
 
         if(!(x < 0 && y < 0)) {
+            cout << x << ' ' << y << '\n';
             if(x >= 50 && x <= 164 && y >= 50 && y <= 90 && getcurrentwindow() == mainPage) {
                 settingsPage = initwindow(600, 800, "Settings Page");
                 setcurrentwindow(settingsPage);
@@ -136,11 +152,26 @@ int main() {
                     setcurrentwindow(gamePage);
                     StartGame(table);
                 }
+                else {
+                    if(x >= 50 && x <= 164 && y >= 300 && y <= 340 && getcurrentwindow() == mainPage) {
+                        break;
+                    }
+                }
             }
         }
     }
 
-    getch();
+    ofstream fout("settings.txt");
+
+    fout << table.settings.botLevel << '\n';
+    fout << table.settings.colorOfPlayer1 << '\n';
+    fout << table.settings.colorOfPlayer2 << '\n';
+    fout << table.settings.firstToWin << '\n';
+    fout << table.settings.isPlayingWithBot << '\n';
+    fout << table.settings.numberOfPoints << '\n';
+
+    fout.close();
+
     closegraph();
 
     return 0;
@@ -307,6 +338,7 @@ void PaintPoints(CTable &table) {
     for(int pInd = 1; pInd <= table.settings.numberOfPoints; pInd++) {
         setcolor(WHITE);
         fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
+        cout << table.points[pInd].x << ' ' << table.points[pInd].y << '\n';
     }
 }
 ///---------------- Initialize Table ---------------------------------------------------------------
