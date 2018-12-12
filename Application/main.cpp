@@ -10,12 +10,13 @@ using namespace std;
 #define MAX_NAME   25
 
 ///---------------- Pages Variables ----------------------------------------------------------------
-int mainPage;
-int settingsPage;
-int chooseColorPage;
-int chooseGameTypePage;
+int mainPage                ;
+int settingsPage            ;
+int chooseColorPage         ;
+int chooseGameTypePage      ;
 int chooseNumberOfPointsPage;
-int gamePage;
+int chooseFirstToWinPage    ;
+int gamePage                ;
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry structs ---------------------------------------------------------------
@@ -69,6 +70,8 @@ void    GenerateNRandomPoints(CTable &table)    ;
 int     CheckWhatPointIsClicked(CTable &table)  ;
 void    PaintPoints(CTable &table)              ;
 void    SetupTable(CTable &table)               ;
+void    PaintLinePts(CTable &table,
+                     int &pIndex1, int &pIndex2);
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry Functions -------------------------------------------------------------
@@ -321,28 +324,26 @@ void StartGame(CTable &table) {
             while(secondPointIndex < 0) {
                 int x = CheckWhatPointIsClicked(table);
                 if(x != -1) {
-                    if(firstPointIndex == -1) {
-                        firstPointIndex = x;
-                        setcolor(RED);
-                        fillellipse(table.points[firstPointIndex].x , table.points[firstPointIndex].y , table.radiusPoints, table.radiusPoints);
-                    }
-                    else {
-                        secondPointIndex = x;
-                        setcolor(RED);
-                        fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
+                    if(table.isSelected[x] == false) {
+                        if(firstPointIndex == -1) {
+                            firstPointIndex = x;
+                            setcolor(RED);
+                            fillellipse(table.points[firstPointIndex].x , table.points[firstPointIndex].y , table.radiusPoints, table.radiusPoints);
+                        }
+                        else {
+                            secondPointIndex = x;
+                            setcolor(RED);
+                            fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
+                        }
                     }
                 }
             }
 
             if(CheckIfSegmentCanBePlaced(table, firstPointIndex, secondPointIndex) == true) {
                 cout << "Player " << playerToMove + 1 << " can place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
-                table.isSelected[firstPointIndex]  = true;
-                table.isSelected[secondPointIndex] = true;
-                setcolor(RED);
-                line(table.points[firstPointIndex].x, table.points[firstPointIndex].y,
-                     table.points[secondPointIndex].x, table.points[secondPointIndex].y);
-                table.segments[++table.numberOfSegments].A = table.points[firstPointIndex];
-                table.segments[table.numberOfSegments].B = table.points[secondPointIndex];
+
+                PaintLinePts(table, firstPointIndex, secondPointIndex);
+
                 playerToMove = 1 - playerToMove;
             }
             else {
@@ -411,3 +412,17 @@ int CalculateSqDistanceBetweenPoints(CPoint &A, CPoint &B) {
     return (A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y);
 }
 ///-------------------------------------------------------------------------------------------------
+
+void PaintLinePts(CTable &table, int &pIndex1, int &pIndex2) {
+    table.isSelected[pIndex1]  = true;
+    table.isSelected[pIndex2] = true;
+
+    setcolor(RED);
+
+    line(table.points[pIndex1].x , table.points[pIndex1].y,
+         table.points[pIndex2].x, table.points[pIndex2].y);
+
+    ++table.numberOfSegments;
+    table.segments[table.numberOfSegments].A = table.points[pIndex1] ;
+    table.segments[table.numberOfSegments].B = table.points[pIndex2];
+}
