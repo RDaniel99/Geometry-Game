@@ -8,6 +8,8 @@ using namespace std;
 
 #define MAX_POINTS 105
 #define MAX_NAME   25
+#define DEFAULT_HEIGHT 800
+#define DEFAULT_WIDTH 600
 
 ///---------------- Pages Variables ----------------------------------------------------------------
 int mainPage                ;
@@ -71,9 +73,11 @@ void    PaintPoints(CTable &table)              ;
 void    SetupTable(CTable &table)               ;
 void    PaintLinePts(CTable &table,
                      int &pIndex1, int &pIndex2);
-int     ChooseMoveBotEasy(CTable &table)        ;
 int     ChooseMoveBotHard(CTable &table)        ;
-int     GetMove(CTable &table, int &playerTurn) ;
+int     ChooseMoveBotEasy(CTable &table,
+                          int &whichOne)        ;
+int     GetMove(CTable &table,
+                int &playerTurn, int &helper)   ;
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry Functions -------------------------------------------------------------
@@ -165,7 +169,7 @@ void GenerateNRandomPoints(CTable &table) {
         int minY = c1.center.y - 3 * c1.radius;
         int maxY = c1.center.y + 3 * c1.radius;
 
-        if(minX > 0 && maxX < table.windowWidth && minY > 0 && minY < table.windowHeight) {
+        if(minX > 0 && maxX < table.windowWidth && minY > 0 && maxY < table.windowHeight) {
             bool flag = false;
             for(int i = 1; i < pointIndex; ++i) {
                 CCircle c2;
@@ -333,7 +337,7 @@ void StartGame(CTable &table) {
                 secondPointIndex = -1;
 
             while(secondPointIndex < 0) {
-                int x = GetMove(table, playerToMove);
+                int x = GetMove(table, playerToMove, firstPointIndex);
                 if(x != -1) {
                     if(table.isSelected[x] == false) {
                         if(firstPointIndex == -1) {
@@ -441,7 +445,7 @@ void PaintLinePts(CTable &table, int &pIndex1, int &pIndex2) {
 ///-------------------------------------------------------------------------------------------------
 
 ///----------------- Choose Bot Level Easy Move ----------------------------------------------------
-int ChooseMoveBotEasy(CTable &table) {
+int ChooseMoveBotHard(CTable &table) {
     int indexChosen = rand() % table.settings.numberOfPoints + 1;
 
     while(table.isSelected[indexChosen] == true) {
@@ -456,13 +460,13 @@ int ChooseMoveBotEasy(CTable &table) {
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Get Move of the Current Player -------------------------------------------------
-int GetMove(CTable &table, int &playerTurn) {
+int GetMove(CTable &table, int &playerTurn, int &helper) {
     if(playerTurn == 1 && table.settings.isPlayingWithBot == true) {
-        if(table.settings.botLevel == 1) {
-            return ChooseMoveBotEasy(table);
+        if(table.settings.botLevel == 2) {
+            return ChooseMoveBotHard(table);
         }
 
-        return ChooseMoveBotHard(table);
+        return ChooseMoveBotEasy(table, helper);
     }
 
     return CheckWhatPointIsClicked(table);
@@ -470,16 +474,44 @@ int GetMove(CTable &table, int &playerTurn) {
 ///-------------------------------------------------------------------------------------------------
 
 ///----------------- Choose Bot Level Hard Move ----------------------------------------------------
-int ChooseMoveBotHard(CTable &table) {
-    int indexChosen = rand() % table.settings.numberOfPoints + 1;
+int ChooseMoveBotEasy(CTable &table, int &whichOne) {
+    int minimumDif = 10000;
+    int idx1 = -1,
+        idx2 = -1;
 
-    while(table.isSelected[indexChosen] == true) {
-        ++indexChosen;
-        if(indexChosen == table.settings.numberOfPoints + 1) {
-            indexChosen = 1;
+    for(int firstPoint = 1; firstPoint <= table.settings.numberOfPoints; ++firstPoint) {
+
+        if(!table.isSelected[firstPoint]) {
+
+            for(int secondPoint = firstPoint + 1; secondPoint <= table.settings.numberOfPoints; ++secondPoint) {
+
+                if(!table.isSelected[secondPoint]) {
+                    if(CheckIfSegmentCanBePlaced(table, firstPoint, secondPoint)) {
+                        int withMinus = 0;
+                        int withPlus  = 0;
+                        for(int anyPoint = 1; anyPoint <= table.settings.numberOfPoints; ++anyPoint) {
+                            if(table.isSelected[anyPoint] == false) {
+                                int orr = ComputeOrientation(table.points[firstPoint], table.points[secondPoint], table.points[anyPoint]);
+                                if(orr < 0) {
+                                    withMinus++;
+                                }
+                                else {
+                                    withPlus++ ;
+                                }
+                            }
+                        }
+
+                        if(minimumDif > abs(withMinus - withPlus)) {
+                            minimumDif = abs(withMinus - withPlus);
+                            idx1 =  firstPoint;
+                            idx2 = secondPoint;
+                        }
+                    }
+                }
+            }
         }
     }
 
-    return indexChosen;
+    return (whichOne == -1 ? idx1 : idx2);
 }
 ///-------------------------------------------------------------------------------------------------
