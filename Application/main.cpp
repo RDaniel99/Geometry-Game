@@ -13,14 +13,14 @@ using namespace std;
 #define DEFAULT_WIDTH 800
 
 ///---------------- Pages Variables ----------------------------------------------------------------
-int mainPage                ;
-int chooseColorPlayer1Page  ;
-int chooseColorPlayer2Page  ;
-int chooseGameTypePage      ;
-int chooseNumberOfPointsPage;
-int settingsPage            ;
-int chooseFirstToWinPage    ;
-int gamePage                ;
+int mainPage                 = -1;
+int chooseColorPlayer1Page   = -1;
+int chooseColorPlayer2Page   = -1;
+int chooseGameTypePage       = -1;
+int chooseNumberOfPointsPage = -1;
+int settingsPage             = -1;
+int chooseFirstToWinPage     = -1;
+int gamePage                 = -1;
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry structs ---------------------------------------------------------------
@@ -44,11 +44,11 @@ struct CSettings
 {
     int numberOfPoints;
 
-    int colorOfPlayer1,
-        colorOfPlayer2;
+    int colorOfPlayer1,    // [1, 14]
+        colorOfPlayer2;    // [1, 14]
 
-    int  botLevel        ;
-    bool isPlayingWithBot;
+    int  botLevel        ; // 1 - easy, 2 - hard
+    bool isPlayingWithBot; // 1 - yes , 0 - no
     int  firstToWin      ;
 };
 ///-------------------------------------------------------------------------------------------------
@@ -132,6 +132,7 @@ int main()
 
     while(true)
     {
+        SaveSettings(table);
         int x, y;
         getmouseclick(WM_LBUTTONDOWN, x, y);
 
@@ -168,7 +169,7 @@ int main()
             setcurrentwindow(chooseNumberOfPointsPage);
             NumberOfPointsPage();
             ConvertFromIntToString(intAsString, table.settings.numberOfPoints);
-            outtextxy(450,108,intAsString);
+            outtextxy(450, 108, intAsString);
             continue;
         }
 
@@ -189,20 +190,22 @@ int main()
 
         if(x >= 180 && x <= 620 && y >= 210 && y <= 260 && getcurrentwindow() == chooseGameTypePage)
         {
+            SetGameWithBot(table, false);
             continue;
-            /// TO DO
         }
 
         if(x >= 80 && x <= 720 && y >= 280 && y <= 320 && getcurrentwindow() == chooseGameTypePage)
         {
+            SetGameWithBot(table, true);
+            SetBotLevel(table, 1);
             continue;
-            /// TO DO
         }
 
         if(x >= 80 && x <= 720 && y >= 340 && y <= 380 && getcurrentwindow() == chooseGameTypePage)
         {
+            SetGameWithBot(table, true);
+            SetBotLevel(table, 2);
             continue;
-            /// TO DO
         }
 
         if(x >= 230 && x <= 570 && y >= 510 && y <= 560 && getcurrentwindow() == chooseGameTypePage)
@@ -235,11 +238,11 @@ int main()
         {
             int tempPointsNumber = table.settings.numberOfPoints;
 
-            tempPointsNumber = tempPointsNumber + 10;
+            tempPointsNumber = tempPointsNumber - 10;
 
-            if(tempPointsNumber > 90)
+            if(tempPointsNumber < 10)
             {
-                    tempPointsNumber = 10;
+                    tempPointsNumber = 90;
             }
 
             ConvertFromIntToString(intAsString, tempPointsNumber);
@@ -372,11 +375,11 @@ void GenerateNRandomPoints(CTable &table)
 ///---------------- Check if a segment can be placed -----------------------------------------------
 bool CheckIfSegmentCanBePlaced(CTable &table, int &firstPointIndex, int &secondPointIndex)
 {
-    if(firstPointIndex == secondPointIndex  )
+    if(firstPointIndex == secondPointIndex)
         return false;
-    if(table.isSelected[firstPointIndex]    )
+    if(table.isSelected[firstPointIndex]  )
         return false;
-    if(table.isSelected[secondPointIndex]   )
+    if(table.isSelected[secondPointIndex] )
         return false;
 
     CSegment segmentToCheck;
@@ -387,6 +390,36 @@ bool CheckIfSegmentCanBePlaced(CTable &table, int &firstPointIndex, int &secondP
     {
         if(SegmentsAreIntersecting(segmentToCheck, table.segments[segmentIndex]) == true)
         {
+            return false;
+        }
+    }
+
+    for(int circleIndex = 1; circleIndex <= table.settings.numberOfPoints; ++circleIndex)
+    {
+        if(circleIndex == firstPointIndex || circleIndex == secondPointIndex || !IsPointOnSegment(segmentToCheck, table.points[circleIndex]))
+        {
+            continue;
+        }
+
+        int xMin = table.points[circleIndex].x - table.radiusPoints;
+        int xMax = table.points[circleIndex].x + table.radiusPoints;
+        int yMin = table.points[circleIndex].y - table.radiusPoints;
+        int yMax = table.points[circleIndex].y + table.radiusPoints;
+
+        CPoint P1, P2, P3, P4;
+        P1.x = xMin, P1.y = yMin;
+        P2.x = xMin, P2.y = yMax;
+        P3.x = xMax, P3.y = yMin;
+        P4.x = xMax, P4.y = yMax;
+
+        int o1 = ComputeOrientation(table.points[firstPointIndex], table.points[secondPointIndex], P1);
+        int o2 = ComputeOrientation(table.points[firstPointIndex], table.points[secondPointIndex], P2);
+        int o3 = ComputeOrientation(table.points[firstPointIndex], table.points[secondPointIndex], P3);
+        int o4 = ComputeOrientation(table.points[firstPointIndex], table.points[secondPointIndex], P4);
+
+        if(!(o1 == o2 && o2 == o3 && o3 == o4 && o4 != 0))
+        {
+            cout << "intersects " << circleIndex << ' ' << table.points[circleIndex].x << ' ' << table.points[circleIndex].y << '\n';
             return false;
         }
     }
