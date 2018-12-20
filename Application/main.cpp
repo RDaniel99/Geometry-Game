@@ -141,32 +141,40 @@ int main()
         cout << x << ' ' << y << '\n';
         if(x >= 40 && x <= 380 && y >= 460 && y <= 510 && getcurrentwindow() == mainPage)
         {
+            int currentWindow = getcurrentwindow();
             settingsPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Settings Page");
             setcurrentwindow(settingsPage);
+            closegraph(currentWindow);
             settingsPageWindow();
             continue;
         }
 
         if(x >= 40 && x <= 160 && y >= 520 && y <= 560 && getcurrentwindow() == mainPage)
         {
+            int currentWindow = getcurrentwindow();
             gamePage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Game Play");
             setcurrentwindow(gamePage);
+            closegraph(currentWindow);
             StartGame(table);
             continue;
         }
 
         if(x >= 70 && x <= 350 && y >= 120 && y <= 160 && getcurrentwindow() == settingsPage)
         {
+            int currentWindow = getcurrentwindow();
             chooseColorPlayer1Page  = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Color for player 1");
             setcurrentwindow(chooseColorPlayer1Page);
+            closegraph(currentWindow);
             Player1Color();
             continue;
         }
 
         if(x >= 70 && x <= 380 && y >= 180 && y <= 220 && getcurrentwindow() == settingsPage)
         {
+            int currentWindow = getcurrentwindow();
             chooseNumberOfPointsPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Number of points");
             setcurrentwindow(chooseNumberOfPointsPage);
+            closegraph(currentWindow);
             NumberOfPointsPage();
             ConvertFromIntToString(intAsString, table.settings.numberOfPoints);
             outtextxy(450, 108, intAsString);
@@ -175,16 +183,20 @@ int main()
 
         if(x >= 70 && x <= 330 && y >= 240 && y <= 280 && getcurrentwindow() == settingsPage)
         {
+            int currentWindow = getcurrentwindow();
             chooseGameTypePage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Game Type");
             setcurrentwindow(chooseGameTypePage);
+            closegraph(currentWindow);
             GameType();
             continue;
         }
 
         if(x >= 70 && x <= 330 && y >= 300 && y <= 340 && getcurrentwindow() == settingsPage)
         {
+            int currentWindow = getcurrentwindow();
             mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
             setcurrentwindow(mainPage);
+            closegraph(currentWindow);
             Menu();
         }
 
@@ -210,8 +222,10 @@ int main()
 
         if(x >= 230 && x <= 570 && y >= 510 && y <= 560 && getcurrentwindow() == chooseGameTypePage)
         {
+            int currentWindow = getcurrentwindow();
             mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
             setcurrentwindow(mainPage);
+            closegraph(currentWindow);
             Menu();
             continue;
         }
@@ -230,7 +244,6 @@ int main()
             ConvertFromIntToString(intAsString, tempPointsNumber);
             outtextxy(450, 108, intAsString);
             SetNumberOfPoints(table, tempPointsNumber);
-            SaveSettings(table);
             continue;
         }
 
@@ -248,14 +261,15 @@ int main()
             ConvertFromIntToString(intAsString, tempPointsNumber);
             outtextxy(450, 108, intAsString);
             SetNumberOfPoints(table, tempPointsNumber);
-            SaveSettings(table);
             continue;
         }
 
         if(x >= 70 && x <= 310 && y >= 150 && y <= 200 && getcurrentwindow() == chooseNumberOfPointsPage)
         {
+            int currentWindow = getcurrentwindow();
             settingsPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Settings Page");
             setcurrentwindow(settingsPage);
+            closegraph(currentWindow);
             settingsPageWindow();
             continue;
         }
@@ -272,16 +286,20 @@ int main()
 
             if(x >= 460 && x <= 550 && y >= 160 && y <= 190)
             {
+                int currentWindow = getcurrentwindow();
                 chooseColorPlayer2Page  = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Color for player 2");
                 setcurrentwindow(chooseColorPlayer2Page);
+                closegraph(currentWindow);
                 Player2Color();
                 continue;
             }
 
             if(x >= 460 && x <= 770 && y >= 220 && y <= 260)
             {
+                int currentWindow = getcurrentwindow();
                 settingsPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Settings Page");
                 setcurrentwindow(settingsPage);
+                closegraph(currentWindow);
                 settingsPageWindow();
                 continue;
             }
@@ -299,8 +317,10 @@ int main()
 
            if(x >= 460 && x <= 770 && y >= 220 && y <= 260)
             {
+                int currentWindow = getcurrentwindow();
                 settingsPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Settings Page");
                 setcurrentwindow(settingsPage);
+                closegraph(currentWindow);
                 settingsPageWindow();
                 continue;
             }
