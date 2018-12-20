@@ -1,18 +1,57 @@
 # depslib dependency file v1.0
-1544607368 source:d:\personal data\faculty documents\projectip\projectip\application\main.cpp
+1545296947 source:d:\personal data\faculty documents\projectip\projectip\application\main.cpp
+	<iostream>
+	<graphics.h>
+	<winbgim.h>
+	<ctime>
+	<fstream>
+	"personalGraphic.h"
+
+1545294979 d:\personal data\faculty documents\projectip\projectip\application\personalgraphic.h
+	<iostream>
+	<graphics.h>
+	<conio.h>
+	<wingdi.h>
+
+1545295090 source:d:\personal data\faculty documents\projectip\projectip\application\personalgraphic.cpp
+	<iostream>
+	<graphics.h>
+	<conio.h>
+	<wingdi.h>
+
+1545236957 source:d:\git\projectip\application\personalgraphic.cpp
+	<iostream>
+	<graphics.h>
+	<conio.h>
+	<wingdi.h>
+
+1545236942 source:d:\git\projectip\application\main.cpp
 	<iostream>
 	<graphics.h>
 	<winbgim.h>
 	<ctime>
 	"personalGraphic.h"
 
-1544173713 d:\personal data\faculty documents\projectip\projectip\application\personalgraphic.h
+1545234204 d:\git\projectip\application\personalgraphic.h
 	<iostream>
 	<graphics.h>
 	<conio.h>
 	<wingdi.h>
 
-1544173712 source:d:\personal data\faculty documents\projectip\projectip\application\personalgraphic.cpp
+1545236942 source:d:\backup\projectip\application\main.cpp
+	<iostream>
+	<graphics.h>
+	<winbgim.h>
+	<ctime>
+	"personalGraphic.h"
+
+1545234204 d:\backup\projectip\application\personalgraphic.h
+	<iostream>
+	<graphics.h>
+	<conio.h>
+	<wingdi.h>
+
+1545236957 source:d:\backup\projectip\application\personalgraphic.cpp
 	<iostream>
 	<graphics.h>
 	<conio.h>
