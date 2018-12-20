@@ -211,10 +211,10 @@ void ConvertFromIntToString(char where[], int what) {
 
     memset(digits, 0, sizeof(digits));
 
-    while(what) {
+    do {
         digits[++digits[0]] = what % 10;
         what /= 10;
-    }
+    }while(what);
 
     for(int i = digits[0]; i > 0; --i) {
         where[digits[0] - i] = digits[i] + '0';

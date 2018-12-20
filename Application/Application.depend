@@ -1,10 +1,12 @@
 # depslib dependency file v1.0
-1545304247 source:d:\personal data\faculty documents\projectip\projectip\application\main.cpp
+1545305760 source:d:\personal data\faculty documents\projectip\projectip\application\main.cpp
 	<iostream>
 	<graphics.h>
 	<winbgim.h>
 	<ctime>
 	<fstream>
+	<chrono>
+	<thread>
 	"personalGraphic.h"
 
 1545298118 d:\personal data\faculty documents\projectip\projectip\application\personalgraphic.h

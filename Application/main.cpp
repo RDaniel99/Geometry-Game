@@ -3,14 +3,17 @@
 #include <winbgim.h>
 #include <ctime>
 #include <fstream>
+#include <chrono>
+#include <thread>
 #include "personalGraphic.h"
 
 using namespace std;
 
-#define MAX_POINTS 90
-#define MAX_NAME   25
-#define DEFAULT_HEIGHT 600
-#define DEFAULT_WIDTH 800
+#define MAX_POINTS          90
+#define MAX_NAME            25
+#define DEFAULT_HEIGHT      600
+#define DEFAULT_WIDTH       800
+#define TIME_BETWEEN_MOVES  500
 
 ///---------------- Pages Variables ----------------------------------------------------------------
 int mainPage                 = -1;
@@ -116,7 +119,6 @@ int main()
 {
     char intAsString [10];
 
-    // Start up main page
     mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
     setcurrentwindow(mainPage);
     Menu();
@@ -138,7 +140,6 @@ int main()
 
         if(x == -1 && y == -1) continue;
 
-        cout << x << ' ' << y << '\n';
         if(x >= 40 && x <= 380 && y >= 460 && y <= 510 && getcurrentwindow() == mainPage)
         {
             int currentWindow = getcurrentwindow();
@@ -607,6 +608,7 @@ void StartGame(CTable &table)
 
             while(secondPointIndex < 0)
             {
+                std::this_thread::sleep_for(std::chrono::milliseconds(TIME_BETWEEN_MOVES));
                 int x = GetMove(table, playerToMove, firstPointIndex);
                 if(x != -1)
                 {
@@ -630,39 +632,47 @@ void StartGame(CTable &table)
 
             if(CheckIfSegmentCanBePlaced(table, firstPointIndex, secondPointIndex) == true)
             {
-                cout << "Player " << playerToMove + 1 << " can place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
-
                 PaintLinePts(table, firstPointIndex, secondPointIndex);
-
                 playerToMove = 1 - playerToMove;
             }
             else
             {
-                cout << "Player " << playerToMove + 1 << "can NOT place segment at: " << firstPointIndex << ' ' << secondPointIndex << '\n';
                 setcolor(WHITE);
                 fillellipse(table.points[firstPointIndex].x, table.points[firstPointIndex].y, table.radiusPoints, table.radiusPoints);
                 fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
             }
         }
 
+        std::this_thread::sleep_for(std::chrono::milliseconds(TIME_BETWEEN_MOVES * 2));
+        int statusWindow = initwindow(200, 150, "End of the game");
+        outtextxy(20, 20, "End of the game.");
         if(playerToMove)
         {
-            cout << "First Player Wins\n";
+            outtextxy(20, 40, "Player 1 wins");
             table.firstWinnings++;
         }
         else
         {
-            cout << "Second player Wins\n";
+            outtextxy(20, 60, "Player 2 wins");
             table.secondWinnings++;
         }
-        cout << table.firstWinnings << ' ' << table.secondWinnings << ' ' << table.settings.firstToWin << '\n';
+        outtextxy(20, 80, "Current score: ");
+        char p[10];
+        ConvertFromIntToString(p, table.firstWinnings);
+        outtextxy(20, 100, p);
+        ConvertFromIntToString(p, table.secondWinnings);
+        outtextxy(20, 120, p);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(TIME_BETWEEN_MOVES * 10));
+        setcurrentwindow(gamePage);
+        closegraph(statusWindow);
     }
     while(max(table.firstWinnings, table.secondWinnings) < table.settings.firstToWin);
 
-    cout << "[DBG] Stop Game...\n";
-
+    mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
     setcurrentwindow(mainPage);
     closegraph(gamePage);
+    Menu();
 }
 ///-------------------------------------------------------------------------------------------------
 
