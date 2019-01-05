@@ -12,3 +12,6 @@ void NumberOfPointsPage();
 void Menu();
 void GameType();
 void ConvertFromIntToString(char where[], int what);
+void HowToPlay();
+void Player1Won();
+void Player2Won();

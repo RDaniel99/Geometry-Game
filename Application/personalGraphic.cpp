@@ -10,6 +10,9 @@ const char *img3 = "SettingsMenu.jpg";
 const char *img4 = "GameMode.jpg";
 const char *img5 = "Color1.jpg";
 const char *img6 = "Color2.jpg";
+const char *img7 = "HowToPlay.jpg";
+const char *img8 = "Player2Won.jpg";
+const char *img9 = "Player1Won.jpg";
 
 /// -----------------------------------------------SETTINGS MENU SELECTARE CULORI-----------------------------------------------------------///
 
@@ -79,19 +82,13 @@ int Player1Color()
 
     setcolor(13);
     setfillstyle(SOLID_FILL,13);
-    rectangle(0,481,120,600);
-    floodfill(1,482,13);
+    rectangle(60,481,180,600);
+    floodfill(61,482,13);
 
     setcolor(14);
     setfillstyle(SOLID_FILL,14);
-    rectangle(121,481,240,600);
-    floodfill(122,482,14);
-
-    setcolor(15);
-    setfillstyle(SOLID_FILL,15);
-    rectangle(241,481,360,600);
-    floodfill(242,482,15);
-
+    rectangle(181,481,300,600);
+    floodfill(182,482,14);
 
 }
 int Player2Color()
@@ -161,19 +158,13 @@ int Player2Color()
 
     setcolor(13);
     setfillstyle(SOLID_FILL,13);
-    rectangle(0,481,120,600);
-    floodfill(1,482,13);
+    rectangle(60,481,180,600);
+    floodfill(61,482,13);
 
     setcolor(14);
     setfillstyle(SOLID_FILL,14);
-    rectangle(121,481,240,600);
-    floodfill(122,482,14);
-
-    setcolor(15);
-    setfillstyle(SOLID_FILL,15);
-    rectangle(241,481,360,600);
-    floodfill(242,482,15);
-
+    rectangle(181,481,300,600);
+    floodfill(182,482,14);
 
 }
 void settingsPageWindow()
@@ -204,6 +195,20 @@ void Menu()
 void GameType()
 {
     readimagefile(img4,0,0,800,600);
+    setcolor(15);
+    setfillstyle(SOLID_FILL,15);
+    rectangle(180,260,620,265);
+    floodfill(181,261,15);
+
+    setcolor(15);
+    setfillstyle(SOLID_FILL,15);
+    rectangle(80,320,720,325);
+    floodfill(81,321,15);
+
+    setcolor(15);
+    setfillstyle(SOLID_FILL,15);
+    rectangle(80,380,720,385);
+    floodfill(81,381,15);
 }
 
 void ConvertFromIntToString(char where[], int what) {
@@ -221,4 +226,16 @@ void ConvertFromIntToString(char where[], int what) {
     }
 
     where[digits[0]] = 0;
+}
+void HowToPlay()
+{
+    readimagefile(img7,0,0,800,600);
+}
+void Player1Won()
+{
+    readimagefile(img8,0,0,800,600);
+}
+void Player2Won()
+{
+    readimagefile(img9,0,0,800,600);
 }

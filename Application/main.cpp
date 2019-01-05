@@ -24,8 +24,9 @@ int chooseNumberOfPointsPage = -1;
 int settingsPage             = -1;
 int chooseFirstToWinPage     = -1;
 int gamePage                 = -1;
+int howtoplay                = -1;
+int EndOfGame                = -1;
 ///-------------------------------------------------------------------------------------------------
-
 ///---------------- Geometry structs ---------------------------------------------------------------
 struct CPoint
 {
@@ -113,7 +114,6 @@ void    SetColorPlayer1  (CTable &table, int color    ) ;
 void    SetColorPlayer2  (CTable &table, int color    ) ;
 ///-------------------------------------------------------------------------------------------------
 
-
 ///---------------- Main Function ------------------------------------------------------------------
 int main()
 {
@@ -140,6 +140,22 @@ int main()
 
         if(x == -1 && y == -1) continue;
 
+        if(x >= 40 && x <= 360 && y >= 380 && y <= 460 && getcurrentwindow() == mainPage)
+        {
+            int currentWindow = getcurrentwindow();
+            howtoplay = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "How To Play");
+            setcurrentwindow(howtoplay);
+            closegraph(currentWindow);
+            HowToPlay();
+        }
+        if(x >= 630 && x <= 750 && y >= 540 && y <= 580 && getcurrentwindow() == howtoplay)
+        {
+            int currentWindow = getcurrentwindow();
+            mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
+            setcurrentwindow(mainPage);
+            closegraph(currentWindow);
+            Menu();
+        }
         if(x >= 40 && x <= 380 && y >= 460 && y <= 510 && getcurrentwindow() == mainPage)
         {
             int currentWindow = getcurrentwindow();
@@ -167,6 +183,10 @@ int main()
             setcurrentwindow(chooseColorPlayer1Page);
             closegraph(currentWindow);
             Player1Color();
+            setcolor(table.settings.colorOfPlayer1);
+            setfillstyle(SOLID_FILL,table.settings.colorOfPlayer1);
+            rectangle(521,341,640,460);
+            floodfill(522,342,table.settings.colorOfPlayer1);
             continue;
         }
 
@@ -204,6 +224,22 @@ int main()
         if(x >= 180 && x <= 620 && y >= 210 && y <= 260 && getcurrentwindow() == chooseGameTypePage)
         {
             SetGameWithBot(table, false);
+
+            setcolor(12);
+            setfillstyle(SOLID_FILL,12);
+            rectangle(180,260,620,265);
+            floodfill(181,261,12);
+
+            setcolor(15);
+            setfillstyle(SOLID_FILL,15);
+            rectangle(80,320,720,325);
+            floodfill(81,321,15);
+
+            setcolor(15);
+            setfillstyle(SOLID_FILL,15);
+            rectangle(80,380,720,385);
+            floodfill(81,381,15);
+
             continue;
         }
 
@@ -211,6 +247,22 @@ int main()
         {
             SetGameWithBot(table, true);
             SetBotLevel(table, 1);
+
+            setcolor(12);
+            setfillstyle(SOLID_FILL,12);
+            rectangle(80,320,720,325);
+            floodfill(81,321,12);
+
+            setcolor(15);
+            setfillstyle(SOLID_FILL,15);
+            rectangle(180,260,620,265);
+            floodfill(181,261,15);
+
+            setcolor(15);
+            setfillstyle(SOLID_FILL,15);
+            rectangle(80,380,720,385);
+            floodfill(81,381,15);
+
             continue;
         }
 
@@ -218,6 +270,22 @@ int main()
         {
             SetGameWithBot(table, true);
             SetBotLevel(table, 2);
+
+            setcolor(12);
+            setfillstyle(SOLID_FILL,12);
+            rectangle(80,380,720,385);
+            floodfill(81,381,12);
+
+            setcolor(15);
+            setfillstyle(SOLID_FILL,15);
+            rectangle(180,260,620,265);
+            floodfill(181,261,15);
+
+            setcolor(15);
+            setfillstyle(SOLID_FILL,15);
+            rectangle(80,320,720,325);
+            floodfill(81,321,15);
+
             continue;
         }
 
@@ -277,11 +345,16 @@ int main()
 
         if(getcurrentwindow() == chooseColorPlayer1Page)
         {
+
             if(getpixel(x, y) >= 1  &&
                getpixel(x, y) <= 14 &&
                getpixel(x, y) != table.settings.colorOfPlayer2)
             {
                 SetColorPlayer1(table, getpixel(x, y));
+                setcolor(table.settings.colorOfPlayer1);
+                setfillstyle(SOLID_FILL,table.settings.colorOfPlayer1);
+                rectangle(521,341,640,460);
+                floodfill(522,342,table.settings.colorOfPlayer1);
                 continue;
             }
 
@@ -292,6 +365,10 @@ int main()
                 setcurrentwindow(chooseColorPlayer2Page);
                 closegraph(currentWindow);
                 Player2Color();
+                setcolor(table.settings.colorOfPlayer2);
+                setfillstyle(SOLID_FILL,table.settings.colorOfPlayer2);
+                rectangle(521,341,640,460);
+                floodfill(522,342,table.settings.colorOfPlayer2);
                 continue;
             }
 
@@ -313,6 +390,11 @@ int main()
               getpixel(x, y) != table.settings.colorOfPlayer1)
             {
                 SetColorPlayer2(table, getpixel(x, y));
+                setcolor(table.settings.colorOfPlayer2);
+                setfillstyle(SOLID_FILL,table.settings.colorOfPlayer2);
+                rectangle(521,341,640,460);
+                floodfill(522,342,table.settings.colorOfPlayer2);
+
                 continue;
             }
 
@@ -571,7 +653,7 @@ void PaintPoints(CTable &table)
 {
     for(int pInd = 1; pInd <= table.settings.numberOfPoints; pInd++)
     {
-        setcolor(WHITE);
+
         fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
     }
 }
@@ -589,14 +671,17 @@ void SetupTable(CTable &table)
 ///---------------- Engine of the game -------------------------------------------------------------
 void StartGame(CTable &table)
 {
+    int current = 1;
     table.firstWinnings = 0;
     table.secondWinnings = 0;
     do
     {
+
         cleardevice();
         SetupTable(table);
         GenerateNRandomPoints(table);
         PaintPoints(table);
+        setcolor(table.settings.colorOfPlayer1);
 
         int playerToMove = 0; // 0 - first, 1 - second
 
@@ -617,13 +702,11 @@ void StartGame(CTable &table)
                         if(firstPointIndex == -1)
                         {
                             firstPointIndex = x;
-                            setcolor(RED);
                             fillellipse(table.points[firstPointIndex].x, table.points[firstPointIndex].y, table.radiusPoints, table.radiusPoints);
                         }
                         else
                         {
                             secondPointIndex = x;
-                            setcolor(RED);
                             fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
                         }
                     }
@@ -634,10 +717,20 @@ void StartGame(CTable &table)
             {
                 PaintLinePts(table, firstPointIndex, secondPointIndex);
                 playerToMove = 1 - playerToMove;
+                if(current == 1)
+                {
+                    current = 2;
+                    setcolor(table.settings.colorOfPlayer2);
+                }
+                else
+                {
+                    current = 1;
+                    setcolor(table.settings.colorOfPlayer1);
+                }
+
             }
             else
             {
-                setcolor(WHITE);
                 fillellipse(table.points[firstPointIndex].x, table.points[firstPointIndex].y, table.radiusPoints, table.radiusPoints);
                 fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
             }
@@ -650,11 +743,13 @@ void StartGame(CTable &table)
         {
             outtextxy(20, 40, "Player 1 wins");
             table.firstWinnings++;
+            current = 1;
         }
         else
         {
             outtextxy(20, 60, "Player 2 wins");
             table.secondWinnings++;
+            current = 1;
         }
         outtextxy(20, 80, "Current score: ");
         char p[10];
@@ -668,10 +763,25 @@ void StartGame(CTable &table)
         closegraph(statusWindow);
     }
     while(max(table.firstWinnings, table.secondWinnings) < table.settings.firstToWin);
-
+    if(table.secondWinnings > table.firstWinnings)
+    {
+        EndOfGame = initwindow (DEFAULT_WIDTH,DEFAULT_HEIGHT, "Winner");
+        setcurrentwindow(EndOfGame);
+        Player1Won();
+        closegraph(gamePage);
+        delay(5000);
+    }
+    if(table.firstWinnings > table.secondWinnings)
+    {
+        EndOfGame = initwindow (DEFAULT_WIDTH,DEFAULT_HEIGHT, "Winner");
+        setcurrentwindow(EndOfGame);
+        closegraph(gamePage);
+        Player2Won();
+        delay(5000);
+    }
     mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
     setcurrentwindow(mainPage);
-    closegraph(gamePage);
+    closegraph(EndOfGame);
     Menu();
 }
 ///-------------------------------------------------------------------------------------------------
@@ -729,14 +839,13 @@ void PaintLinePts(CTable &table, int &pIndex1, int &pIndex2)
     table.isSelected[pIndex1]  = true;
     table.isSelected[pIndex2] = true;
 
-    setcolor(RED);
-
     line(table.points[pIndex1].x, table.points[pIndex1].y,
          table.points[pIndex2].x, table.points[pIndex2].y);
 
     ++table.numberOfSegments;
     table.segments[table.numberOfSegments].A = table.points[pIndex1] ;
     table.segments[table.numberOfSegments].B = table.points[pIndex2];
+
 }
 ///-------------------------------------------------------------------------------------------------
 
