@@ -62,7 +62,7 @@
 	<conio.h>
 	<wingdi.h>
 
-1546857741 source:d:\personal data\faculty documents\projectip\application\main.cpp
+1546889950 source:d:\personal data\faculty documents\projectip\application\main.cpp
 	<iostream>
 	<graphics.h>
 	<winbgim.h>
@@ -70,6 +70,7 @@
 	<fstream>
 	<chrono>
 	<thread>
+	<mmsystem.h>
 	"personalGraphic.h"
 
 1546718044 d:\personal data\faculty documents\projectip\application\personalgraphic.h

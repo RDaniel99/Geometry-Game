@@ -5,6 +5,7 @@
 #include <fstream>
 #include <chrono>
 #include <thread>
+#include <mmsystem.h>
 #include "personalGraphic.h"
 
 using namespace std;
@@ -88,9 +89,10 @@ void    PaintLinePts(CTable &table,
 int     ChooseMoveBotHard(CTable &table)        ;
 int     ChooseMoveBotEasy(CTable &table,
                           int &whichOne)        ;
-int     GetMove(CTable &table,
-                int &playerTurn, int &helper)   ;
-void    ColorPoint(int colorP, CTable &table)   ;
+int     GetMove(CTable &table, int &playerTurn,
+                int &helper, int &triesGetMove) ;
+void    ColorPoint(int colorP, int idxP,
+                   CTable &table)               ;
 
 ///-------------------------------------------------------------------------------------------------
 
@@ -463,9 +465,9 @@ void ColorPoint(int colorP, int pInd, CTable &table)
 
     circle(table.points[pInd].x, table.points[pInd].y, table.radiusPoints);
 
-    setfillstyle(SOLID_FILL, ColorP);
+    setfillstyle(SOLID_FILL, colorP);
 
-    floodfill(table.points[pInd].x, table.points[pInd].y, ColorP);
+    floodfill(table.points[pInd].x, table.points[pInd].y, colorP);
 }
 ///-------------------------------------------------------------------------------------------------
 
@@ -573,7 +575,6 @@ bool CheckIfSegmentCanBePlaced(CTable &table, int &firstPointIndex, int &secondP
 
         if(!(o1 == o2 && o2 == o3 && o3 == o4 && o4 != 0))
         {
-            cout << "intersects " << circleIndex << ' ' << table.points[circleIndex].x << ' ' << table.points[circleIndex].y << '\n';
             return false;
         }
     }
@@ -704,8 +705,7 @@ void PaintPoints(CTable &table)
 {
     for(int pInd = 1; pInd <= table.settings.numberOfPoints; pInd++)
     {
-
-        fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
+        ColorPoint(WHITE, pInd, table);
     }
 }
 ///---------------- Initialize Table ---------------------------------------------------------------
@@ -732,20 +732,10 @@ void StartGame(CTable &table)
         SetupTable(table);
         GenerateNRandomPoints(table);
         PaintPoints(table);
-        while(true) {
-            int idxP = CheckWhatPointIsClicked(table);
-
-            if(idxP == -1) {
-                continue;
-            }
-
-            cout << idxP << '\n';
-
-            ColorPoint(RED, idxP, table);
-        }
         setcolor(table.settings.colorOfPlayer1);
 
         int playerToMove = 0; // 0 - first, 1 - second
+        int triesGetMove = 0;
 
         while(!TheGameIsOver(table))
         {
@@ -756,7 +746,7 @@ void StartGame(CTable &table)
             while(secondPointIndex < 0)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(TIME_BETWEEN_MOVES));
-                int x = GetMove(table, playerToMove, firstPointIndex);
+                int x = GetMove(table, playerToMove, firstPointIndex, triesGetMove);
                 if(x != -1)
                 {
                     if(table.isSelected[x] == false)
@@ -764,12 +754,14 @@ void StartGame(CTable &table)
                         if(firstPointIndex == -1)
                         {
                             firstPointIndex = x;
-                            fillellipse(table.points[firstPointIndex].x, table.points[firstPointIndex].y, table.radiusPoints, table.radiusPoints);
+                            int colorPlayer = (!playerToMove ? table.settings.colorOfPlayer1 : table.settings.colorOfPlayer2);
+                            ColorPoint(colorPlayer, firstPointIndex, table);
                         }
                         else
                         {
                             secondPointIndex = x;
-                            fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
+                            int colorPlayer = (!playerToMove ? table.settings.colorOfPlayer1 : table.settings.colorOfPlayer2);
+                            ColorPoint(colorPlayer, secondPointIndex, table);
                         }
                     }
                 }
@@ -790,30 +782,39 @@ void StartGame(CTable &table)
                     setcolor(table.settings.colorOfPlayer1);
                 }
 
+                cout << "Placed segment between " << firstPointIndex << ' ' << secondPointIndex << '\n';
             }
             else
             {
-                fillellipse(table.points[firstPointIndex].x, table.points[firstPointIndex].y, table.radiusPoints, table.radiusPoints);
-                fillellipse(table.points[secondPointIndex].x, table.points[secondPointIndex].y, table.radiusPoints, table.radiusPoints);
+                ColorPoint(WHITE, firstPointIndex, table);
+                ColorPoint(WHITE, secondPointIndex, table);
+                cout << "Can t place segment between " << firstPointIndex << ' ' << secondPointIndex << '\n';
+                if(!playerToMove) Beep(532, 500);
             }
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(TIME_BETWEEN_MOVES * 2));
-        int statusWindow = initwindow(200, 150, "End of the game");
-        outtextxy(20, 20, "End of the game.");
+
+        int  statusWindow = initwindow(200, 150, "End of the game");
+        char text[]       = "End of the game.";
+        outtextxy(20, 20, text);
+
         if(playerToMove)
         {
-            outtextxy(20, 40, "Player 1 wins");
+            char text[] = "Player 1 wins";
+            outtextxy(20, 50, text);
             table.firstWinnings++;
-            current = 1;
         }
         else
         {
-            outtextxy(20, 60, "Player 2 wins");
+            char text[] = "Player 2 wins";
+            outtextxy(20, 50, text);
             table.secondWinnings++;
-            current = 1;
         }
-        outtextxy(20, 80, "Current score: ");
+
+        current = 1;
+        char ntext[] = "Current score: ";
+        outtextxy(20, 80, ntext);
         char p[10];
         ConvertFromIntToString(p, table.firstWinnings);
         outtextxy(20, 100, p);
@@ -825,6 +826,7 @@ void StartGame(CTable &table)
         closegraph(statusWindow);
     }
     while(max(table.firstWinnings, table.secondWinnings) < table.settings.firstToWin);
+
     if(table.secondWinnings > table.firstWinnings)
     {
         EndOfGame = initwindow (DEFAULT_WIDTH,DEFAULT_HEIGHT, "Winner");
@@ -833,7 +835,7 @@ void StartGame(CTable &table)
         closegraph(gamePage);
         delay(5000);
     }
-    if(table.firstWinnings > table.secondWinnings)
+    else
     {
         EndOfGame = initwindow (DEFAULT_WIDTH,DEFAULT_HEIGHT, "Winner");
         setcurrentwindow(EndOfGame);
@@ -841,6 +843,7 @@ void StartGame(CTable &table)
         Player2Won();
         delay(5000);
     }
+
     mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
     setcurrentwindow(mainPage);
     closegraph(EndOfGame);
@@ -930,12 +933,13 @@ int ChooseMoveBotHard(CTable &table)
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Get Move of the Current Player -------------------------------------------------
-int GetMove(CTable &table, int &playerTurn, int &helper)
+int GetMove(CTable &table, int &playerTurn, int &helper, int &tried)
 {
     if(playerTurn == 1 && table.settings.isPlayingWithBot == true)
     {
-        if(table.settings.botLevel == 2)
+        if(table.settings.botLevel == 2 && tried < 5)
         {
+            ++tried;
             return ChooseMoveBotHard(table);
         }
 
