@@ -460,8 +460,12 @@ int main()
 void ColorPoint(int colorP, int pInd, CTable &table)
 {
     setcolor(colorP);
-    fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
 
+    circle(table.points[pInd].x, table.points[pInd].y, table.radiusPoints);
+
+    setfillstyle(SOLID_FILL, ColorP);
+
+    floodfill(table.points[pInd].x, table.points[pInd].y, ColorP);
 }
 ///-------------------------------------------------------------------------------------------------
 
