@@ -90,6 +90,8 @@ int     ChooseMoveBotEasy(CTable &table,
                           int &whichOne)        ;
 int     GetMove(CTable &table,
                 int &playerTurn, int &helper)   ;
+void    ColorPoint(int colorP, CTable &table)   ;
+
 ///-------------------------------------------------------------------------------------------------
 
 ///---------------- Geometry Functions -------------------------------------------------------------
@@ -117,7 +119,7 @@ void    SetColorPlayer2  (CTable &table, int color    ) ;
 ///---------------- Main Function ------------------------------------------------------------------
 int main()
 {
-    int CurrentLevel = 1;
+    int CurrentLevel;
     char intAsString [10];
 
     mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
@@ -132,6 +134,13 @@ int main()
 
     table.windowHeight = DEFAULT_HEIGHT;
     table.windowWidth  = DEFAULT_WIDTH ;
+
+    if(table.settings.isPlayingWithBot == false) {
+        CurrentLevel = 1;
+    }
+    else {
+        CurrentLevel = table.settings.botLevel + 1;
+    }
 
     while(true)
     {
@@ -445,16 +454,16 @@ int main()
     return 0;
 }
 ///-------------------------------------------------------------------------------------------------
+
 ///---------------- Color a point ------------------------------------------------------------------
 
-void ColorPoint(int ColorP,CTable &table)
+void ColorPoint(int colorP, int pInd, CTable &table)
 {
-    int pInd;
-    pInd = CheckWhatPointIsClicked(table);
-    setcolor(ColorP);
+    setcolor(colorP);
     fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
 
 }
+///-------------------------------------------------------------------------------------------------
 
 ///---------------- Generator of N Random Points ---------------------------------------------------
 void GenerateNRandomPoints(CTable &table)
@@ -719,6 +728,17 @@ void StartGame(CTable &table)
         SetupTable(table);
         GenerateNRandomPoints(table);
         PaintPoints(table);
+        while(true) {
+            int idxP = CheckWhatPointIsClicked(table);
+
+            if(idxP == -1) {
+                continue;
+            }
+
+            cout << idxP << '\n';
+
+            ColorPoint(RED, idxP, table);
+        }
         setcolor(table.settings.colorOfPlayer1);
 
         int playerToMove = 0; // 0 - first, 1 - second
