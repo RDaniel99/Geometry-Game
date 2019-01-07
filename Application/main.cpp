@@ -117,6 +117,7 @@ void    SetColorPlayer2  (CTable &table, int color    ) ;
 ///---------------- Main Function ------------------------------------------------------------------
 int main()
 {
+    int CurrentLevel = 1;
     char intAsString [10];
 
     mainPage = initwindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Segments Game");
@@ -209,6 +210,27 @@ int main()
             setcurrentwindow(chooseGameTypePage);
             closegraph(currentWindow);
             GameType();
+            if(CurrentLevel == 1)
+            {
+                setcolor(12);
+            setfillstyle(SOLID_FILL,12);
+            rectangle(180,260,620,265);
+            floodfill(181,261,12);
+            }
+            if(CurrentLevel == 2)
+            {
+            setcolor(12);
+            setfillstyle(SOLID_FILL,12);
+            rectangle(80,320,720,325);
+            floodfill(81,321,12);
+            }
+            if(CurrentLevel == 3)
+            {
+            setcolor(12);
+            setfillstyle(SOLID_FILL,12);
+            rectangle(80,380,720,385);
+            floodfill(81,381,12);
+            }
             continue;
         }
 
@@ -223,6 +245,8 @@ int main()
 
         if(x >= 180 && x <= 620 && y >= 210 && y <= 260 && getcurrentwindow() == chooseGameTypePage)
         {
+            CurrentLevel = 1;
+
             SetGameWithBot(table, false);
 
             setcolor(12);
@@ -245,6 +269,8 @@ int main()
 
         if(x >= 80 && x <= 720 && y >= 280 && y <= 320 && getcurrentwindow() == chooseGameTypePage)
         {
+            CurrentLevel = 2;
+
             SetGameWithBot(table, true);
             SetBotLevel(table, 1);
 
@@ -268,6 +294,8 @@ int main()
 
         if(x >= 80 && x <= 720 && y >= 340 && y <= 380 && getcurrentwindow() == chooseGameTypePage)
         {
+            CurrentLevel = 3;
+
             SetGameWithBot(table, true);
             SetBotLevel(table, 2);
 
@@ -417,8 +445,18 @@ int main()
     return 0;
 }
 ///-------------------------------------------------------------------------------------------------
+///---------------- Color a point ------------------------------------------------------------------
 
-///---------------- Generator of N Random Points ----------------------------------------------------
+void ColorPoint(int ColorP,CTable &table)
+{
+    int pInd;
+    pInd = CheckWhatPointIsClicked(table);
+    setcolor(ColorP);
+    fillellipse(table.points[pInd].x, table.points[pInd].y, table.radiusPoints, table.radiusPoints);
+
+}
+
+///---------------- Generator of N Random Points ---------------------------------------------------
 void GenerateNRandomPoints(CTable &table)
 {
     srand(time(NULL));
