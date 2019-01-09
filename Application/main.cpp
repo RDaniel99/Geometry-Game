@@ -781,14 +781,11 @@ void StartGame(CTable &table)
                     current = 1;
                     setcolor(table.settings.colorOfPlayer1);
                 }
-
-                cout << "Placed segment between " << firstPointIndex << ' ' << secondPointIndex << '\n';
             }
             else
             {
                 ColorPoint(WHITE, firstPointIndex, table);
                 ColorPoint(WHITE, secondPointIndex, table);
-                cout << "Can t place segment between " << firstPointIndex << ' ' << secondPointIndex << '\n';
                 if(!playerToMove) Beep(532, 500);
             }
         }
